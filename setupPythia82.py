@@ -20,9 +20,9 @@ if __name__ == "__main__":
     os.system('mkdir '+ args.work_dir)
     getpythia= 'cd '+ args.work_dir+ ' ;wget http://home.thep.lu.se/~torbjorn/pythia8/pythia8240.tgz;'
     comp = 'cd '+ args.work_dir+ ' ;tar xvfz pythia8240.tgz;'  + 'tar xvfz pythia8240.tgz;' + 'cd pythia8240;' + 'make'
-  #  os.system(getpythia)
- #   os.system(comp)
+    os.system(getpythia)
+    os.system(comp)
     copy = 'cp main99.cc main99.cmnd ' + args.work_dir + '/pythia8240/examples;'
-#    os.system(copy)
+    os.system(copy)
     print "Instruction:\n"
     print "cd ", args.work_dir, "/pythia8240/examples;   make main99; ./main99 main99.cmnd;"
