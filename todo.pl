@@ -48,14 +48,15 @@ for($l=0;$l<$numArgs; $l++){
 
 
 	system(sprintf("rm install_env_*"));
-	system(sprintf("echo \"export PYTHIA8='$PWD/$setdir/tauola++/1.1.5/pythia8/176/'\">> install_env_$time"));
-	system(sprintf("echo \"export PYTHIA8DATA='$PWD/$setdir/tauola++/1.1.5/pythia8/176/xmldoc'\">> install_env_$time"));
+
 	system(sprintf("echo \"export LD_LIBRARY_PATH=$SLDP:$PWD/$setdir/tauola++/1.1.5/TauSpiner/lib\">> install_env_$time"));
 	system(sprintf("echo \"export LD_LIBRARY_PATH=$SLDP:$PWD/$setdir/tauola++/1.1.5/pythia8/176/lib/\">> install_env_$time"));
 	system(sprintf("echo \"export LD_LIBRARY_PATH=$SLDP:$PWD/$setdir/tauola++/1.1.5/HepMC-2.06.05/workdir/lib \">> install_env_$time"));
 	system(sprintf("echo \"export LD_LIBRARY_PATH=$SLDP:$PWD/$setdir/tauola++/1.1.5/lhapdf-5.9.1/workdir/lib\">> install_env_$time"));
 	system(sprintf("echo \"export LD_LIBRARY_PATH=$SLDP:$PWD/$setdir/tauola++/1.1.5/examples/UserCodes\">> install_env_$time"));
 	system(sprintf("echo \"cmsrel CMSSW_10_4_0; cd CMSSW_10_4_0/src/; cmsenv; cd ../../;\">> install_env_$time"));
+	system(sprintf("echo \"export PYTHIA8='$PWD/$setdir/tauola++/1.1.5/pythia8/176/'\">> install_env_$time"));
+	system(sprintf("echo \"export PYTHIA8DATA='$PWD/$setdir/tauola++/1.1.5/pythia8/176/xmldoc'\">> install_env_$time"));
 #system(sprintf("echo \"cernlib-use --version 5.34.18 root \n\">> Install_TauolaEnvironment_$time"));
 #	system(sprintf("echo \"source /cvmfs/cms.cern.ch/slc6_amd64_gcc700/lcg/root/6.12.07-ikaegh3/bin/thisroot.sh \n\">> install_env_$time"));
 
@@ -107,6 +108,8 @@ for($l=0;$l<$numArgs; $l++){
 	system(sprintf("mkdir $PWD/$tauoladir/tauola++/1.1.5/pythia8/176/workdir; "));
 	system(sprintf("cd $PWD/$tauoladir/tauola++/1.1.5/pythia8/176/;  ./configure --enable-shared --lcgplatform=slc6_amd64_gcc530-opt --with-hepmc=$PWD/$tauoladir/tauola++/1.1.5/HepMC-2.06.05/workdir --with-hepmcversion=2.06.05;"));
 	system(sprintf("cd $PWD/$tauoladir/tauola++/1.1.5/pythia8/176/;  make; "));
+	system(sprintf("cp -r UserArea/ $PWD/$tauoladir/tauola++/1.1.5/pythia8/176/; "));
+
 	printf("\n ___________________Compiling MC-TESTER ... _____________________\n\n\n");
 	system(sprintf("cd $PWD/$tauoladir/tauola++/1.1.5/MC-TESTER/;  ./configure --with-HepMC=$PWD/$tauoladir/tauola++/1.1.5/HepMC-2.06.05/workdir; "));
 	system(sprintf("cd $PWD/$tauoladir/tauola++/1.1.5/MC-TESTER/;  make; "));
