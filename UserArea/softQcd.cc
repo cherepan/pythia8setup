@@ -39,7 +39,7 @@ int main(int argc,char **argv) {
   double tau_eta(0.);
   double source_id(0.);
 
-  TFile *file = TFile::Open("output" + TString(argv[2]) +".root","recreate");
+  TFile *file = TFile::Open("res/output" + TString(argv[2]) +".root","recreate");
   TTree * tree = new TTree("tree","pythia_tree");
   tree->Branch("tau_p",&tau_p);
   tree->Branch("tau_eta",&tau_eta);
@@ -48,7 +48,7 @@ int main(int argc,char **argv) {
 
   Hist pT("transverse momentum", 100, 0., 10.);
 
-
+  int taucounter(0);
 
   // event loop
   for(int iEvent = 0; iEvent < nEvent; ++iEvent){
@@ -60,6 +60,7 @@ int main(int argc,char **argv) {
     for (int i = 0; i < pythia.event.size(); ++i) {
       //      std::cout<< pythia.event[i].id() << std::endl;
       if (abs(pythia.event[i].id()) == 15){ 
+	taucounter++;
 	iTau = i; 
 	taufound = true; 
 	//	for(int d = 0; d < pythia.event[i].daughterList().size(); d++){
@@ -97,6 +98,9 @@ int main(int argc,char **argv) {
   cout << "|------------------------------------------------------|" << "\n" << endl;
 
 
+  cout << "\n" << "|------------------------------------------------------------|" << endl;
+  cout<< "| Event generated: " <<  nEvent <<"  taus found: "<< taucounter<< "   per event: "<<(float)taucounter/(float)nEvent <<std::endl;
+  cout << "|------------------------------------------------------------|" << "\n" << endl;
   // Done.
   return 0;
 }

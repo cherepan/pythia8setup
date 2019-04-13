@@ -109,6 +109,7 @@ for($l=0;$l<$numArgs; $l++){
 	system(sprintf("cd $PWD/$tauoladir/tauola++/1.1.5/pythia8/176/;  ./configure --enable-shared --lcgplatform=slc6_amd64_gcc530-opt --with-hepmc=$PWD/$tauoladir/tauola++/1.1.5/HepMC-2.06.05/workdir --with-hepmcversion=2.06.05;"));
 	system(sprintf("cd $PWD/$tauoladir/tauola++/1.1.5/pythia8/176/;  make; "));
 	system(sprintf("cp -r UserArea/ $PWD/$tauoladir/tauola++/1.1.5/pythia8/176/; "));
+	system(sprintf("cd  $PWD/$tauoladir/tauola++/1.1.5/pythia8/176/UserArea; mkdir res; "));
 
 	printf("\n ___________________Compiling MC-TESTER ... _____________________\n\n\n");
 	system(sprintf("cd $PWD/$tauoladir/tauola++/1.1.5/MC-TESTER/;  ./configure --with-HepMC=$PWD/$tauoladir/tauola++/1.1.5/HepMC-2.06.05/workdir; "));
