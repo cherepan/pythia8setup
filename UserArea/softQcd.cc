@@ -64,6 +64,24 @@ int main(int argc,char **argv) {
     for (int i = 0; i < pythia.event.size(); ++i) {
       TLorentzVector particle = TLorentzVector(pythia.event[i].px(),pythia.event[i].py(),pythia.event[i].pz(),pythia.event[i].e());
       //      std::cout<< pythia.event[i].name() << "   mass:  "<< particle.M()<<std::endl;
+      if (abs(pythia.event[i].id()) == 431){ 
+	std::cout<< pythia.event[i].name() << "   Found. See its decay below "<<std::endl;
+	  for(int m = 0; m < pythia.event[i].daughterList().size(); m++){
+	    std::cout<<"==================>> Ds decays:   "<< pythia.event[pythia.event[i].daughterList().at(m)].name() << "   "<<std::endl;
+	    if( pythia.event[pythia.event[i].daughterList().at(m)].id()==333){
+	      int phidau1= pythia.event[pythia.event[i].daughterList().at(m)].daughter1();
+	      int phidau2= pythia.event[pythia.event[i].daughterList().at(m)].daughter1();
+	      TLorentzVector particle_fromphi1 = TLorentzVector(pythia.event[phidau1].px(),pythia.event[phidau1].py(),pythia.event[phidau1].pz(),pythia.event[phidau1].e());
+	      TLorentzVector particle_fromphi2 = TLorentzVector(pythia.event[phidau2].px(),pythia.event[phidau2].py(),pythia.event[phidau2].pz(),pythia.event[phidau2].e());
+	      std::cout<<"========================>> phi decays:   "<< pythia.event[phidau1].name() << "   "<<pythia.event[phidau2].name() <<"   mass:  " << (particle_fromphi1+particle_fromphi2).M()<<std::endl;
+
+	    }
+
+	  }
+
+      }
+
+
       if (abs(pythia.event[i].id()) == 13){ 
 
 	if( fabs(pythia.event[i].eta()) < 2.5 && pythia.event[i].pT() > 0.5 && pythia.event[i].isFinal()){
@@ -80,14 +98,15 @@ int main(int argc,char **argv) {
 
     //    std::cout<<"muon_indices.size()  " <<muon_indices.size() <<std::endl;
     //    if()
-    if(muon_indices.size()==3){
+    if(muon_indices.size()==2){
       for(unsigned int k =0; k< muon_indices.size(); k++){
 	//	std::cout<<"==================>> mu index "<< muon_indices.at(k) <<std::endl;
 	for(int m = 0; m < pythia.event[muon_indices.at(k)].motherList().size(); m++){
 	  std::cout<<  " source:   " <<  pythia.event[pythia.event[ muon_indices.at(k)].motherList().at(m)].name() << "   "<<std::endl;  
 	}
       }
-
+    }
+    if(muon_indices.size()==3){
       unsigned int i1 = muon_indices.at(0);
       unsigned int i2 = muon_indices.at(1);
       unsigned int i3 = muon_indices.at(2);
