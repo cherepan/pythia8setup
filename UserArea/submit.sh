@@ -7,5 +7,5 @@ printf "Job is running in directory: "; /bin/pwd
 echo
 printf $1,$2,$3,'\n'
 echo "\n Working hard..."
-./softQcd.exe run_card.cmnd condor_test
+./softQcd.exe $1 $2
 echo "Science complete!"

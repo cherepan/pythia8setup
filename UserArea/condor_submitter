@@ -1,6 +1,7 @@
 universe     = vanilla
 rank         = memory
 executable   = submit.sh
+arguments    = run_card.cmnd condortest 300
 output       = Set_1-Condor_$(cluster)_$(proccess).o
 error        = Set_1-Condor_$(cluster)_$(proccess).e
 log          = Set_1-Condor_$(cluster)_$(proccess).log
