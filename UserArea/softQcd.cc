@@ -40,10 +40,18 @@ int main(int argc,char **argv) {
   double source_id(0.);
   double threemu_mass(0.);
 
+  std::vector<float> SignalParticle_pdgId;
+  std::vector<std::vector<float> > SignalParticle_p4;
+  std::vector<std::vector<int> > SignalParticle_childpdgid;
+  std::vector<std::vector<std::vector<float> > > SignalParticle_childp4;
 
   TFile *file = TFile::Open("res/output" + TString(argv[2]) +".root","recreate");
   TTree * tree = new TTree("tree","pythia_tree");
-  tree->Branch("threemu_mass",&threemu_mass);
+
+  tree->Branch("SignalParticle_pdgId",&SignalParticle_pdgId);
+  tree->Branch("SignalParticle_p4",&SignalParticle_p4);
+  tree->Branch("SignalParticle_childpdgid",&SignalParticle_childpdgid);
+  tree->Branch("SignalParticle_childp4",&SignalParticle_childp4);
   //  tree->Branch("tau_eta",&tau_eta);
   //  tree->Branch("source_id",&source_id);
 
@@ -55,36 +63,95 @@ int main(int argc,char **argv) {
   // event loop
   for(int iEvent = 0; iEvent < nEvent; ++iEvent){
     std::vector<int> muon_indices;
+    std::vector<int> tau_indices;
+    std::vector<int> dump_index;
+
+
+    SignalParticle_pdgId.clear();
+    SignalParticle_p4.clear();
+    SignalParticle_childpdgid.clear();
+    SignalParticle_childp4.clear();
+
+
+
+
+    //    ClearEvent();
+
     //    std::cout<<"---------------- "<< std::endl;
     if (!pythia.next()) continue;
 
 
-    bool taufound(false);    int iTau = 0;
-    //    std::cout<< "   new event   "<< std::endl;
     for (int i = 0; i < pythia.event.size(); ++i) {
       TLorentzVector particle = TLorentzVector(pythia.event[i].px(),pythia.event[i].py(),pythia.event[i].pz(),pythia.event[i].e());
-      //      std::cout<< pythia.event[i].name() << "   mass:  "<< particle.M()<<std::endl;
-      if (abs(pythia.event[i].id()) == 13){ 
+      if(abs(pythia.event[i].id()) == 15){
+	tau_indices.push_back(i);
+	dump_index.push_back(i);
+      }
 
-	if( fabs(pythia.event[i].eta()) < 2.5 && pythia.event[i].pT() > 0.5 && pythia.event[i].isFinal()){
+      if (abs(pythia.event[i].id()) == 13){ 
+	if( fabs(pythia.event[i].eta()) < 2.8 && pythia.event[i].pT() > 0.2){
 	  muon_indices.push_back(i);
-	  //	  std::cout<< " Filling   Muon indices  " << i  << "   mass:  "<< particle.M()<<std::endl;
-	  //	  particle.Print();
-	}
-	for(int m = 0; m < pythia.event[i].motherList().size(); m++){
-	  //	  std::cout<<"==================>> mot "<< pythia.event[pythia.event[i].motherList().at(m)].name() << "   "<<std::endl;  
-	  source_id=pythia.event[pythia.event[i].motherList().at(m)].id();
+	  dump_index.push_back(i);
 	}
       }
     }
 
-    //    std::cout<<"muon_indices.size()  " <<muon_indices.size() <<std::endl;
-    //    if()
+
+    
+    if(tau_indices.size()>0 or  muon_indices.size()  > 2){
+    std::cout<<"tau size  "<< tau_indices.size() << std::endl;
+    std::cout<<"muonsize  "<< muon_indices.size() << std::endl;
+      for ( auto &k : dump_index ) {
+	for (auto &m : pythia.event[k].motherList()){
+	  for (auto &mm : pythia.event[k].motherList()){  std::cout<<"  indixes  "<< mm  <<std::endl;}
+
+	  std::cout<<"signal particle  "<< pythia.event[m].name() <<std::endl;
+	  SignalParticle_childpdgid.push_back(std::vector<int>());
+	  SignalParticle_childp4.push_back(std::vector<std::vector<float> >());
+	  SignalParticle_pdgId.push_back(pythia.event[m].id());
+
+	  std::vector<float> iSig_p4;
+	  iSig_p4.push_back(pythia.event[m].e());
+	  iSig_p4.push_back(pythia.event[m].px());
+	  iSig_p4.push_back(pythia.event[m].py());
+	  iSig_p4.push_back(pythia.event[m].pz());
+	  SignalParticle_p4.push_back(iSig_p4);
+
+
+	  int mother_index = m;
+	  for (auto &d :  pythia.event[mother_index].daughterList()){
+	    std::cout<<"=============================>> daughters  "<< pythia.event[d].name() <<std::endl;
+
+	    std::vector<float> ichildp4;
+	    ichildp4.push_back(pythia.event[d].e());
+	    ichildp4.push_back(pythia.event[d].px());
+	    ichildp4.push_back(pythia.event[d].py());
+	    ichildp4.push_back(pythia.event[d].pz());
+
+	    SignalParticle_childpdgid.at(SignalParticle_childpdgid.size() - 1).push_back(pythia.event[d].id());
+	    SignalParticle_childp4.at(SignalParticle_childpdgid.size() - 1).push_back(ichildp4);
+	    for (auto &dd :  pythia.event[d].daughterList()){
+	      std::cout<<"==========================================>> daughters  "<< pythia.event[dd].name() <<std::endl;
+	      for (auto &ddd :  pythia.event[dd].daughterList()){
+		std::cout<<"==================================================>> daughters  "<< pythia.event[ddd].name() <<std::endl;
+		for (auto &dddd :  pythia.event[ddd].daughterList()){
+		  std::cout<<"=========================================================>> daughters  "<< pythia.event[dddd].name() <<std::endl;
+		}
+	      }
+	    }
+
+	  }
+	}
+      }
+      tree->Fill();
+    }
+
+
     if(muon_indices.size()==3){
       for(unsigned int k =0; k< muon_indices.size(); k++){
 	//	std::cout<<"==================>> mu index "<< muon_indices.at(k) <<std::endl;
 	for(int m = 0; m < pythia.event[muon_indices.at(k)].motherList().size(); m++){
-	  std::cout<<  " source:   " <<  pythia.event[pythia.event[ muon_indices.at(k)].motherList().at(m)].name() << "   "<<std::endl;  
+	  //	  std::cout<<  " source:   " <<  pythia.event[pythia.event[ muon_indices.at(k)].motherList().at(m)].name() << "   "<<std::endl;  
 	}
       }
 
@@ -99,12 +166,12 @@ int main(int argc,char **argv) {
       TLorentzVector ThreeMuLV = Mu1 + Mu2 + Mu3;
       threemu_mass = ThreeMuLV.M();
       //      std::cout<<" three mu mass " << ThreeMuLV.M() << " mu mass check  " <<Mu1.M() << std::endl;
-      tree->Fill();
+
     }
 
-    tau_p=pythia.event[iTau].pT();
-    tau_eta=pythia.event[iTau].eta();
-    pT.fill( pythia.event[iTau].pT() );
+    //    tau_p=pythia.event[iTau].pT();
+    //    tau_eta=pythia.event[iTau].eta();
+    //    pT.fill( pythia.event[iTau].pT() );
 
   // End event loop.
   }
@@ -131,3 +198,11 @@ int main(int argc,char **argv) {
   // Done.
   return 0;
 }
+
+
+
+
+//void ClearEvent(){
+//  tau_index.clear();
+//  muon_indices.clear();
+//}
