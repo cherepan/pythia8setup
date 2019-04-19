@@ -25,10 +25,8 @@ int main(int argc,char **argv) {
   bool doThreeMu(true);
   Pythia pythia; 
   pythia.readFile(argv[1]);
-  double pythia_seed = TMath::Hash(argv[2])/10000.;
-  string pythiaseedline = "Random:seed = " + to_string(pythia_seed);
   pythia.readString("Random:setSeed = on");
-  pythia.readString(pythiaseedline);
+  pythia.readString("Random:seed = " + to_string(TMath::Hash(argv[2])/10000.)); // Hash the pythia seed from the output file name
   pythia.init(); 
   int nEvent = pythia.mode("Main:numberOfEvents");
 
@@ -104,8 +102,6 @@ int main(int argc,char **argv) {
       }
     }
     removeDuplicates(SignalParticleIndex);
-    
-
 
     if(SignalParticleIndex.size()!=0){
       if(DEBUG)std::cout<<"N taus "<< tau_indices.size() <<" N three mu  " <<muon_indices.size() << std::endl;
