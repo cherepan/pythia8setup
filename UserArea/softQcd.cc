@@ -1,4 +1,4 @@
-B0;136;0c// File: softQcd.cc
+// File: softQcd.cc
 // Vladimir Cherepanov
 
 
