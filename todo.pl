@@ -54,7 +54,7 @@ for($l=0;$l<$numArgs; $l++){
 	system(sprintf("echo \"export LD_LIBRARY_PATH=$SLDP:$PWD/$setdir/tauola++/1.1.5/HepMC-2.06.05/workdir/lib \">> install_env_$time"));
 	system(sprintf("echo \"export LD_LIBRARY_PATH=$SLDP:$PWD/$setdir/tauola++/1.1.5/lhapdf-5.9.1/workdir/lib\">> install_env_$time"));
 	system(sprintf("echo \"export LD_LIBRARY_PATH=$SLDP:$PWD/$setdir/tauola++/1.1.5/examples/UserCodes\">> install_env_$time"));
-	system(sprintf("echo \"cmsrel CMSSW_10_4_0; cd CMSSW_10_4_0/src/; cmsenv; cd ../../;\">> install_env_$time"));
+	system(sprintf("echo \"cmsrel CMSSW_9_3_8; cd CMSSW_9_3_8/src/; cmsenv; cd ../../;\">> install_env_$time"));
 	system(sprintf("echo \"export PYTHIA8='$PWD/$setdir/tauola++/1.1.5/pythia8/176/'\">> install_env_$time"));
 	system(sprintf("echo \"export PYTHIA8DATA='$PWD/$setdir/tauola++/1.1.5/pythia8/176/xmldoc'\">> install_env_$time"));
 #system(sprintf("echo \"cernlib-use --version 5.34.18 root \n\">> Install_TauolaEnvironment_$time"));
