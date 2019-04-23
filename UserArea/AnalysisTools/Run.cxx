@@ -55,6 +55,16 @@ int main() {
 	time_t startTime;//, endTime, beforeLoop, afterLoop;
 	time(&startTime);
 
+
+	TString path= (TString)std::getenv("PWD");
+	TString FileName  = "Output.root";
+	TFile *file = new TFile(FileName,"RECREATE");
+
+	TH1F *tauPT= new TH1F("tauPT","p_{T}(#tau), GeV ",50,0,20);
+	TH1F *tauETA= new TH1F("tauETA","#eta(#tau) ",50,-5,5);
+
+
+
 	//TApplication App(argv[0],&argc,argv);
 	gROOT->ProcessLine("#include <vector>");
 	gSystem->Load("$ROOTSYS/lib/libPhysics.so");
@@ -62,7 +72,7 @@ int main() {
 
 	TString base = std::getenv("PWD");
 	base += "/";
-	TString FileList = base + "Filelist.dat";
+	TString FileList = base + "Files.dat";
 
 	std::vector<TString> Files;
 	GetVectorString(Files, FileList);
@@ -70,13 +80,47 @@ int main() {
 	Tools Tls(Files);
 	Int_t nentries = Tls.Get_Entries();
 
+	std::vector<TLorentzVector> Muons;
+	std::vector<TLorentzVector> Sources;
+	std::vector<int> Muon_source;
+
 	for (int i = 0; i < nentries; i++) {
+	  Muons.clear();
+	  Muon_source.clear();
 	  Tls.Get_Event(i);
-	  std::cout<<"  N Signal Particles  : "<<Tls.NSignalParticles()<<std::endl;
+	  TLorentzVector TauLV;
+	  bool tau_found(false);
 	  for(int isigp=0; isigp< Tls.NSignalParticles(); isigp++){
-	    std::cout <<"  mass  " <<Tls.SignalParticle_p4(isigp).M() << " N Decay products  " <<  Tls.NDecayProducts(isigp) << std::endl;
+
+	    for(int j=0; j< Tls.NDecayProducts(isigp); j++){
+	      if(abs(Tls.SignalParticle_child_pdgId(isigp,j))==15){
+		tau_found = true;
+		TauLV=Tls.SignalParticle_childp4(isigp,j);
+	      }
+
+	      if(abs(Tls.SignalParticle_child_pdgId(isigp,j))==13){
+		Muons.push_back(Tls.SignalParticle_childp4(isigp,j));
+		Muon_source.push_back(Tls.SignalParticle_pdgId(isigp));
+		Sources.push_back(Tls.SignalParticle_p4(isigp));
+	      }
+	    }
 	  }
+	  if(tau_found){
+	  tauPT->Fill(TauLV.Pt());
+	  tauETA->Fill(TauLV.Eta());
+	  }
+
+
+	  //	  std::cout<<"Muons:  "<<Muons.size() << std::endl;
+	  std::cout<<"----"<<std::endl;
+	  for(int i=0; i < Muon_source.size(); i++){
+
+	    std::cout<<"Muons:  "<<Muon_source.at(i) << std::endl;
+	    Sources.at(i).Print();
+	  }
+
 	}
+	file->Write();
 	std::cout << "Program is Finished" << endl;
 	system("date");
 }
