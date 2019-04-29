@@ -72,7 +72,7 @@ int main() {
 
 	TString base = std::getenv("PWD");
 	base += "/";
-	TString FileList = base + "Files.dat";
+	TString FileList = base + "InputFiles.dat";
 
 	std::vector<TString> Files;
 	GetVectorString(Files, FileList);
@@ -112,11 +112,11 @@ int main() {
 
 
 	  //	  std::cout<<"Muons:  "<<Muons.size() << std::endl;
-	  std::cout<<"----"<<std::endl;
+	  //	  std::cout<<"----"<<std::endl;
 	  for(int i=0; i < Muon_source.size(); i++){
 
-	    std::cout<<"Muons:  "<<Muon_source.at(i) << std::endl;
-	    Sources.at(i).Print();
+	    //	    std::cout<<"Muons:  "<<Muon_source.at(i) << std::endl;
+	    //	    Sources.at(i).Print();
 	  }
 
 	}
