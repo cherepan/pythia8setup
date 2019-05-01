@@ -3,6 +3,11 @@ Beams:idA = 2212 ! first incoming beam is a 2212, i.e. a proton.
 Beams:idB = 2212 ! second beam is also a proton.11
 Beams:eCM = 13000. ! the cm energy of collisions.
 SoftQCD:minBias = on ! switch on the process minBias
+431:onMode = off
+431:onIfAny = 15
+15:addChannel = on .01 0 13 13 -13
+15:onMode = off
+15:onIfMatch = 13 13 13
 Main:numberOfEvents = 500       ! number of events to generate
 
 

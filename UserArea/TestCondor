@@ -1,0 +1,19 @@
+
+Executable = short.sh 
+
+# ERROR and OUTPUT are the error and output channels from your job
+# that HTCondor returns from the remote host.
+Error = job.error
+Output = job.output
+
+# The LOG file is where HTCondor places information about your 
+# job's status, success, and resource consumption. 
+Log = job.log
+
+# +ProjectName is the name of the project reported to the OSG accounting system.
+# If not specified, the default project in $HOME/.ciconnect/defaultproject is used.
+# +ProjectName="cms-org-nd"
+
+# QUEUE is the "start button" - it launches any jobs that have been 
+# specified thus far. 
+Queue 1

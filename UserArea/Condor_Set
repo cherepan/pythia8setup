@@ -1,0 +1,9 @@
+universe     = vanilla
+rank         = memory
+executable   = short.sh
+output       = Set-Condor_$(cluster)_$(proccess).o
+error        = Set-Condor_$(cluster)_$(proccess).e
+log          = Set-Condor_$(cluster)_$(proccess).log
+getenv       = True
+notification = Error
+queue  1

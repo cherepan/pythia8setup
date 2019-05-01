@@ -7,7 +7,7 @@
 -include ../config.mk
 
 # A few variables used in this Makefile:
-EX           := softQcd
+EX           := softQcd DsDPlusBackground
 EXE          := $(addsuffix .exe,$(EX))
 PYTHIA8      ?= $(PWD)/..
 STATICLIB    := $(PYTHIA8)/lib/archive/libpythia8.a
@@ -36,6 +36,12 @@ softQcd: $(STATICLIB) softQcd.cc
 	rootcint -f softQcdDict.cc -c $(DICTCXXFLAGS) pythiaROOT.h pythiaLinkdef.h
 	$(CXX) $(ROOTCXXFLAGS) softQcdDict.cc $@.cc -o $@.exe $(LDFLAGS1)
 
+
+DsDPlusBackground: $(STATICLIB) DsDPlusBackground.cc
+	rootcint -f DsDPlusBackgroundDict.cc -c $(DICTCXXFLAGS) pythiaROOT.h pythiaLinkdef.h
+	$(CXX) $(ROOTCXXFLAGS) DsDPlusBackgroundDict.cc $@.cc -o $@.exe $(LDFLAGS1)
+
+
 # Rule to build full dictionary
 dict: $(SHAREDLIB)
 	rootcint -f pythiaDict.cc -c $(DICTCXXFLAGS) \
@@ -57,5 +63,5 @@ $(SHAREDLIB):
 # Clean up
 clean:
 	rm -f $(EXE) hist.root pythiaDict.* *.pcm *~\
-               softQcdDict.cc softQcdDict.h 
+               softQcdDict.cc softQcdDict.h DsDPlusBackgroundDict.cc DsDPlusBackgroundDict.h
 
