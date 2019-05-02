@@ -25,12 +25,17 @@ public :
 // Fixed size dimensions of array or collections stored in the TTree if any.
 
    // Declaration of leaf types
-   std::vector<float>   *SignalParticle_pdgId;
+   std::vector<int>   *SignalParticle_pdgId;
    std::vector<std::vector<float> > *SignalParticle_p4;
    std::vector<std::vector<int> > *SignalParticle_child_pdgId;
    std::vector<std::vector<std::vector<float> > > *SignalParticle_childp4;
    std::vector<std::vector<int> > *SignalParticle_child_decay_pdgid;
    std::vector<std::vector<std::vector<float> > > *SignalParticle_child_decay_p4;
+   std::vector<std::vector<std::vector<int> > > *SignalParticle_child_child_pdgId;
+   std::vector<std::vector<std::vector<std::vector<float> > > > *SignalParticle_child_child_p4;
+
+
+
 
    // List of branches
    TBranch        *b_SignalParticle_pdgId;   //!
@@ -39,6 +44,11 @@ public :
    TBranch        *b_SignalParticle_childp4;   //!
    TBranch        *b_SignalParticle_child_decay_pdgid;   //!
    TBranch        *b_SignalParticle_child_decay_p4;   //!
+   TBranch        *b_SignalParticle_child_child_pdgId;   //!
+   TBranch        *b_SignalParticle_child_child_p4;   //!
+
+
+
 
    ReadNtuple(TTree *tree=0);
    virtual ~ReadNtuple();
@@ -111,6 +121,9 @@ void ReadNtuple::Init(TTree *tree)
    SignalParticle_childp4 = 0;
    SignalParticle_child_decay_pdgid = 0;
    SignalParticle_child_decay_p4 = 0;
+   SignalParticle_child_child_pdgId = 0;
+   SignalParticle_child_child_p4 = 0;
+
    // Set branch addresses and branch pointers
    if (!tree) return;
    fChain = tree;
@@ -123,6 +136,9 @@ void ReadNtuple::Init(TTree *tree)
    fChain->SetBranchAddress("SignalParticle_childp4", &SignalParticle_childp4, &b_SignalParticle_childp4);
    fChain->SetBranchAddress("SignalParticle_child_decay_pdgid", &SignalParticle_child_decay_pdgid, &b_SignalParticle_child_decay_pdgid);
    fChain->SetBranchAddress("SignalParticle_child_decay_p4", &SignalParticle_child_decay_p4, &b_SignalParticle_child_decay_p4);
+   fChain->SetBranchAddress("SignalParticle_child_child_pdgId", &SignalParticle_child_child_pdgId, &b_SignalParticle_child_child_pdgId);
+   fChain->SetBranchAddress("SignalParticle_child_child_p4", &SignalParticle_child_child_p4, &b_SignalParticle_child_child_p4);
+
    Notify();
 }
 

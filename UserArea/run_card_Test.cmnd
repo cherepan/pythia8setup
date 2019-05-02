@@ -40,7 +40,7 @@ SoftQCD:minBias = on ! switch on the process minBias
 113:onMode = off
 113:onIfMatch = 13 13 ! rho -> mu mu
 
-Main:numberOfEvents = 500       ! number of events to generate
+Main:numberOfEvents = 1000       ! number of events to generate
 
 
 

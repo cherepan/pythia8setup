@@ -4,12 +4,10 @@
 #include <time.h>
 #include <cstdlib>
 #include <stdlib.h> 
-
-
 #include <string.h>
 #include <istream>
 #include <strstream>
-
+ 
 #include "TApplication.h"
 #include "TROOT.h"
 #include "TSystem.h"
@@ -61,11 +59,12 @@ int main() {
 	TFile *file = new TFile(FileName,"RECREATE");
 	TTree * t = new TTree("T","T");
 
-	double m12,m13,m23;
+	double m12,m13,m23,m;
 
 	t->Branch("m12",&m12);
 	t->Branch("m13",&m13);
 	t->Branch("m23",&m23);
+	t->Branch("m",&m);
 
 	TH1F *tauPT= new TH1F("tauPT","p_{T}(#tau), GeV ",50,0,20);
 	TH1F *tauETA= new TH1F("tauETA","#eta(#tau) ",50,-5,5);
@@ -83,7 +82,7 @@ int main() {
 
 	TString base = std::getenv("PWD");
 	base += "/";
-	TString FileList = base + "InputFiles.dat";
+	TString FileList = base + "InputFilesSignal.dat";
 
 	std::vector<TString> Files;
 	GetVectorString(Files, FileList);
@@ -115,8 +114,25 @@ int main() {
 	  bool tau_found(false);
 	  bool threemu_found(false);
 	  for(int isigp=0; isigp< Tls.NSignalParticles(); isigp++){
-
+	    std::cout<<"signal_particle id:  "<< Tls.SignalParticle_pdgId(isigp) << std::endl;
+	    Tls.SignalParticle_p4(isigp).Print();
 	    for(int j=0; j< Tls.NDecayProducts(isigp); j++){
+	      std::cout<<"--- decay  "<< Tls.SignalParticle_child_pdgId(isigp,j) << "    " << Tls.NChildDecayProducts(j) <<std::endl;
+	      std::cout<<"  N  "<< Tls.NChildChildProducts(isigp,j)<<std::endl;
+	      Tls.SignalParticle_childp4(isigp,j).Print();
+	      if(Tls.SignalParticle_child_pdgId(isigp,j)==13)MuonsNeg.push_back(Tls.SignalParticle_childp4(isigp,j));
+	      if(Tls.SignalParticle_child_pdgId(isigp,j)==-13)MuonsPos.push_back(Tls.SignalParticle_childp4(isigp,j));
+
+	      TLorentzVector Mass(0,0,0,0);
+	      for(int k=0; k< Tls.NChildDecayProducts(j); k++){
+		std::cout<<"  -------  "  << Tls.SignalParticle_child_decay_pdgId(j,k) << std::endl;
+		Tls.SignalParticle_child_decay_p4(j,k).Print();
+		if(Tls.SignalParticle_child_decay_pdgId(j,k)==13)MuonsNeg.push_back(Tls.SignalParticle_child_decay_p4(j,k));
+		if(Tls.SignalParticle_child_decay_pdgId(j,k)==-13)MuonsPos.push_back(Tls.SignalParticle_child_decay_p4(j,k));
+
+		Mass+=Tls.SignalParticle_child_decay_p4(j,k);
+	      }
+	      std::cout<<" Mass   "<< Mass.M()<< std::endl;
 	      if(abs(Tls.SignalParticle_child_pdgId(isigp,j))==15){
 		tau_found = true;
 		TauLV=Tls.SignalParticle_childp4(isigp,j);
@@ -124,8 +140,7 @@ int main() {
 
 	      if(abs(Tls.SignalParticle_child_pdgId(isigp,j))==13){
 
-		if(Tls.SignalParticle_child_pdgId(isigp,j)==13)MuonsNeg.push_back(Tls.SignalParticle_childp4(isigp,j));
-		if(Tls.SignalParticle_child_pdgId(isigp,j)==-13)MuonsPos.push_back(Tls.SignalParticle_childp4(isigp,j));
+
 
 		Muons.push_back(Tls.SignalParticle_childp4(isigp,j));
 		Muon_source.push_back(Tls.SignalParticle_pdgId(isigp));
@@ -141,7 +156,7 @@ int main() {
 
 	  if(Muons.size() > 2) threemu_found=true;
 
-	  //	  std::cout<<"  neg: "<< MuonsNeg.size()  << "  pos  " <<MuonsPos.size() << std::endl;
+	  std::cout<<"  neg: "<< MuonsNeg.size()  << "  pos  " <<MuonsPos.size() << std::endl;
 
 
 
@@ -151,7 +166,7 @@ int main() {
 	    tauETA->Fill(TauLV.Eta());
 	  }
 
-	  if(Muons.size()==3){
+	  if((MuonsNeg.size() + MuonsPos.size()) ==3){
 	    TLorentzVector OsMuon(0,0,0,0);
 	    TLorentzVector Ss1Muon(0,0,0,0);
 	    TLorentzVector Ss2Muon(0,0,0,0);
@@ -175,6 +190,17 @@ int main() {
 	    m12 = (OsMuon+Ss1Muon).M();
 	    m23 = (Ss1Muon+ Ss2Muon).M();
 	    m13 = (OsMuon + Ss2Muon).M();
+
+	    std::cout<<" m12:   "<< m12 << std::endl;
+	    std::cout<<" m13:   "<< m13 << std::endl;
+	    std::cout<<" m23:   "<< m23 << std::endl;
+
+	    OsMuon.Print();
+	    Ss1Muon.Print();
+	    Ss2Muon.Print();
+
+
+	    m = (OsMuon+Ss1Muon + Ss2Muon).M();
 	    t->Fill();
 
 	  }

@@ -1,4 +1,4 @@
-// File: DsDPlusBackground.cc
+// File: softQcd.cc
 // Vladimir Cherepanov
 
 
@@ -8,8 +8,6 @@
 #include "TString.h"
 #include "TMath.h"
 #include "TLorentzVector.h"
-#include <algorithm>
-
 
 using namespace Pythia8;
 
@@ -22,9 +20,9 @@ void removeDuplicates(std::vector<int>& vec)
 
 
 int main(int argc,char **argv) {
-  bool DEBUG(false);
-  bool doTaus(false);
-  bool doThreeMu(true);
+  bool DEBUG(true);
+  bool doTaus(true);
+  bool doThreeMu(false);
   Pythia pythia; 
   pythia.readFile(argv[1]);
   pythia.readString("Random:setSeed = on");
@@ -37,12 +35,10 @@ int main(int argc,char **argv) {
   double t = 0.0;
   start = clock();
   int taucounter(0);
-  std::vector<int> SignalParticle_pdgId;
+  std::vector<float> SignalParticle_pdgId;
   std::vector<std::vector<float> > SignalParticle_p4;
   std::vector<std::vector<int> > SignalParticle_child_pdgId;
   std::vector<std::vector<std::vector<float> > > SignalParticle_childp4;
-  std::vector<std::vector<std::vector<int> > >   SignalParticle_child_child_pdgId;
-  std::vector<std::vector<std::vector<std::vector<float> > >  >  SignalParticle_child_child_p4;
 
   std::vector<std::vector<int> > SignalParticle_child_decay_pdgid;
   std::vector<std::vector<std::vector<float> > > SignalParticle_child_decay_p4;
@@ -51,7 +47,7 @@ int main(int argc,char **argv) {
   std::vector<std::vector<int> > subchild_idx;
 
   TFile *file = TFile::Open("res/output" + TString(argv[2]) +".root","recreate");
-  TTree * tree = new TTree("tree","pythia_tree");
+  /*  TTree * tree = new TTree("tree","pythia_tree");
 
   tree->Branch("SignalParticle_pdgId",&SignalParticle_pdgId);
   tree->Branch("SignalParticle_p4",&SignalParticle_p4);
@@ -59,49 +55,71 @@ int main(int argc,char **argv) {
   tree->Branch("SignalParticle_childp4",&SignalParticle_childp4);
   tree->Branch("SignalParticle_child_decay_pdgid",&SignalParticle_child_decay_pdgid);
   tree->Branch("SignalParticle_child_decay_p4",&SignalParticle_child_decay_p4);
+  */
 
-  tree->Branch("SignalParticle_child_child_pdgId",&SignalParticle_child_child_pdgId);
-  tree->Branch("SignalParticle_child_child_p4",&SignalParticle_child_child_p4);
+
+  Event *event = &pythia.event;
+  TTree *T = new TTree("T","ev1 Tree");
+  T->Branch("event",&event);
+
+
+
   //  Hist pT("transverse momentum", 100, 0., 10.);
   // event loop
-  std::vector<int> SignalParticleList;
-  std::vector<int> SignalParticleIndex;
-  SignalParticleList.push_back(431);
-  SignalParticleList.push_back(411);
   for(int iEvent = 0; iEvent < nEvent; ++iEvent){
     std::vector<int> muon_indices;
     std::vector<int> tau_indices;
     std::vector<int> dump_index;
-    
-    SignalParticleIndex.clear();    
+
+
     SignalParticle_pdgId.clear();
     SignalParticle_p4.clear();
     SignalParticle_child_pdgId.clear();
     SignalParticle_childp4.clear();
-    
+
     SignalParticle_child_decay_pdgid.clear();
     SignalParticle_child_decay_p4.clear();
-
-    SignalParticle_child_child_pdgId.clear();
-    SignalParticle_child_child_p4.clear();
 
     subchild_idx.clear();
     if (!pythia.next()) continue;
     for (int i = 0; i < pythia.event.size(); ++i) {
-      int id=abs(pythia.event[i].id());
-      if(std::find(SignalParticleList.begin(), SignalParticleList.end(), id) != SignalParticleList.end()){
-	SignalParticleIndex.push_back(i);
+      if(abs(pythia.event[i].id()) == 15){
+	tau_indices.push_back(i);
+	dump_index.push_back(i);
+	taucounter++;
+      }
+
+      if (abs(pythia.event[i].id()) == 13){ 
+	if( fabs(pythia.event[i].eta()) < 2.8 && pythia.event[i].pT() > 0.2){
+	  muon_indices.push_back(i);
+	  dump_index.push_back(i);
+	}
       }
     }
-  
 
+    std::vector<int> SignalParticleIndex;
+    std::vector<int> SelectedIndexCollection;
+    if(tau_indices.size()>0 &&  muon_indices.size() <3) SelectedIndexCollection = tau_indices;
+    else if(muon_indices.size()>2) SelectedIndexCollection=dump_index;
+    
+    if(!doTaus && muon_indices.size()>2)SelectedIndexCollection=muon_indices;
+
+    for ( auto &k : SelectedIndexCollection ) {
+      for (auto &m : pythia.event[k].motherList()){
+	SignalParticleIndex.push_back(m);
+      }
+    }
+    removeDuplicates(SignalParticleIndex);
 
     if(SignalParticleIndex.size()!=0){
+      if(DEBUG)std::cout<<"N taus "<< tau_indices.size() <<" N three mu  " <<muon_indices.size() << std::endl;
       for (auto &m : SignalParticleIndex){
 	
+	if(DEBUG)std::cout<<"signal particle  "<< pythia.event[m].name() <<std::endl;
 	SignalParticle_child_pdgId.push_back(std::vector<int>());
 	SignalParticle_childp4.push_back(std::vector<std::vector<float> >());
 	SignalParticle_pdgId.push_back(pythia.event[m].id());
+	
 	std::vector<float> iSig_p4;
 	iSig_p4.push_back(pythia.event[m].e());
 	iSig_p4.push_back(pythia.event[m].px());
@@ -109,16 +127,10 @@ int main(int argc,char **argv) {
 	iSig_p4.push_back(pythia.event[m].pz());
 	SignalParticle_p4.push_back(iSig_p4);
 	
-
-	std::vector<std::vector<int> > temp_child_child_pdgid;
-	std::vector<std::vector<std::vector<float> > > temp_child_child_p4;
-
-	if(DEBUG)	std::cout<<"=======================>> SignalParticle  "<< pythia.event[m].name() <<"   daughtersize " << pythia.event[m].daughterList().size()<<std::endl;
+	  
 	int mother_index = m;
 	for (auto &d :  pythia.event[mother_index].daughterList()){
-	  temp_child_child_pdgid.push_back(std::vector<int>());
-	  temp_child_child_p4.push_back(std::vector<std::vector<float> >());
-
+	  
 	  std::vector<float> ichildp4;
 	  ichildp4.push_back(pythia.event[d].e());
 	  ichildp4.push_back(pythia.event[d].px());
@@ -128,19 +140,10 @@ int main(int argc,char **argv) {
 	  SignalParticle_child_pdgId.at(SignalParticle_child_pdgId.size() - 1).push_back(pythia.event[d].id());
 	  SignalParticle_childp4.at(SignalParticle_child_pdgId.size() - 1).push_back(ichildp4);
 	  subchild_idx.push_back(std::vector<int>());
-	  if(DEBUG)  	  std::cout<<"================================>> daughters  "<< pythia.event[d].name() <<"   daughtersize " << pythia.event[d].daughterList().size()<<std::endl;
+	  std::cout<<"================================>> daughters  "<< pythia.event[d].name() <<"   daughtersize " << pythia.event[d].daughterList().size()<<std::endl;
 	  for (auto &dd :  pythia.event[d].daughterList()){
 	    subchild_idx.at(subchild_idx.size() - 1).push_back(dd);
-	    std::vector<float> ip4;
-	    ip4.push_back(pythia.event[dd].e());
-	    ip4.push_back(pythia.event[dd].px());
-	    ip4.push_back(pythia.event[dd].py());
-	    ip4.push_back(pythia.event[dd].pz());
-	    temp_child_child_pdgid.at(temp_child_child_pdgid.size() - 1).push_back(pythia.event[dd].id());
-	    temp_child_child_p4.at(temp_child_child_p4.size() - 1).push_back(ip4);
-
-
-	    if(DEBUG){
+	    if(DEBUG)   		{
 	      std::cout<<"==========================================>> daughters  "<< pythia.event[dd].name() <<"   daughtersize " << pythia.event[dd].daughterList().size()<<std::endl;
 	      for (auto &ddd :  pythia.event[dd].daughterList()){
 		std::cout<<"==================================================>> daughters  "<< pythia.event[ddd].name() <<" daughtersize " << pythia.event[ddd].daughterList().size()<<std::endl;
@@ -152,47 +155,36 @@ int main(int argc,char **argv) {
 	    }
 	  }
 	}
-	SignalParticle_child_child_p4.push_back(temp_child_child_p4);
-	SignalParticle_child_child_pdgId.push_back(temp_child_child_pdgid);
       }
-      std::cout<<"size: "<< SignalParticle_child_child_pdgId.size() << std::endl;
-      for (auto &j:SignalParticle_pdgId){
-
-	std::cout<< j <<std::endl;
-      }
-
-    if(DEBUG)      std::cout<<" subchild_idx size  "<< subchild_idx.size() << std::endl;
-    for (auto &i:subchild_idx){
-      if(DEBUG)        std::cout<<"  i.size  "<< i.size() << std::endl;
-      SignalParticle_child_decay_pdgid.push_back(std::vector<int>());
-      SignalParticle_child_decay_p4.push_back(std::vector<std::vector<float> >());
-      for (auto &j:i){
-	std::vector<float> ip4;
-	ip4.push_back(pythia.event[j].e());
-	ip4.push_back(pythia.event[j].px());
-	ip4.push_back(pythia.event[j].py());
-	ip4.push_back(pythia.event[j].pz());
-	SignalParticle_child_decay_pdgid.at(SignalParticle_child_decay_pdgid.size() - 1).push_back(pythia.event[j].id());
-	SignalParticle_child_decay_p4.at(SignalParticle_child_decay_pdgid.size() - 1).push_back(ip4);
+      
+      
+	  for (auto &i:subchild_idx){
+            SignalParticle_child_decay_pdgid.push_back(std::vector<int>());
+            SignalParticle_child_decay_p4.push_back(std::vector<std::vector<float> >());
+	    for (auto &j:i){
+	      std::vector<float> ip4;
+              ip4.push_back(pythia.event[j].e());
+              ip4.push_back(pythia.event[j].px());
+              ip4.push_back(pythia.event[j].py());
+              ip4.push_back(pythia.event[j].pz());
+              SignalParticle_child_decay_pdgid.at(SignalParticle_child_decay_pdgid.size() - 1).push_back(pythia.event[j].id());
+              SignalParticle_child_decay_p4.at(SignalParticle_child_decay_pdgid.size() - 1).push_back(ip4);
+	    }
+	  }
 	
-	if(DEBUG)  	std::cout<<" sub sub chiled id   "<<pythia.event[j].name() <<   "  "<<ip4.at(1) <<std::endl;
-	
+	  T->Fill();
       }
-    }
-    
-    tree->Fill();
-    }
-  }
+  
       
   // End event loop.
-
+  }
 
   // Statistics on event generation.
   // cout << pT;
   pythia.stat();
 
-  //  T->Print();
-  tree->Write();
+  T->Print();
+  //  tree->Write();
   delete file;
 
 

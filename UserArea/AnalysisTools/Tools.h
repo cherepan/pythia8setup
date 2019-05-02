@@ -66,6 +66,7 @@ class Tools{
 
 
 
+
   // Ntuple Access Functions 
   virtual Int_t Get_Entries();
   virtual void Get_Event(int _jentry);
@@ -95,7 +96,7 @@ class Tools{
 												     Ntp->SignalParticle_child_decay_p4->at(i).at(j).at(3),
 												     Ntp->SignalParticle_child_decay_p4->at(i).at(j).at(0));}
 
-
+  int NChildChildProducts(unsigned int i, unsigned int j){std::cout<< Ntp->SignalParticle_child_child_pdgId->at(i).at(j).size() << std::endl; return 999;}
   int SignalParticle_child_decay_pdgId(unsigned int i, unsigned int j){return Ntp->SignalParticle_child_decay_pdgid->at(i).at(j);}
 
 };
