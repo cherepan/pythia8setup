@@ -37,9 +37,9 @@ void ReadNtuple::Loop()
    for (Long64_t jentry=0; jentry<nentries;jentry++) {
       Long64_t ientry = LoadTree(jentry);
       //      std::cout<<"size  "<< SignalParticle_pdgId->size() << std::endl;
-      for(auto &i:*SignalParticle_pdgId){
+      //      for(auto &i:*SignalParticle_pdgId){
 	//	std::cout<<"pdg id  "<< i <<std::endl;
-      }
+      //      }
       if (ientry < 0) break;
       nb = fChain->GetEntry(jentry);   nbytes += nb;
       // if (Cut(ientry) < 0) continue;

@@ -47,6 +47,56 @@ void GetVectorString(std::vector<TString> &v,TString file){
   return;
 }
 
+std::vector<TLorentzVector> sortMuons(std::vector<std::pair<int,TLorentzVector> >  pairs){
+  int mum(0), mup(0);
+  TLorentzVector OSMu(0,0,0,0);
+  TLorentzVector SSMu1(0,0,0,0);
+  TLorentzVector SSMu2(0,0,0,0);
+  for (auto &i:pairs){
+    if(i.first == 13)mum++;
+    if(i.first == -13)mup++;
+  }
+  if(mup==1&&mum==2){
+    int nss=0;
+    for (auto &i:pairs){
+      if(i.first ==-13){
+	OSMu=i.second;
+      }
+      if(i.first==13 && nss==0){
+	nss++;
+	SSMu1=i.second;
+      }
+      if(i.first==13 && nss==1){
+	SSMu2=i.second;
+      }
+    }
+  }
+
+  if(mup==2&&mum==1){
+    int nss=0;
+
+    for (auto &i:pairs){
+      if(i.first ==13){
+        OSMu=i.second;
+      }
+      if(i.first==-13 && nss==0){
+        nss++;
+        SSMu1=i.second;
+      }
+      if(i.first==-13 && nss==1){
+        SSMu2=i.second;
+      }
+    }
+  }
+
+  std::vector<TLorentzVector> out;
+  out.push_back(OSMu);
+  out.push_back(SSMu1);
+  out.push_back(SSMu2);
+  return out;
+}
+
+
 int main() {
         std::cout << "Program is Starting" << endl;
 	system("date");
@@ -60,18 +110,31 @@ int main() {
 	TTree * t = new TTree("T","T");
 
 	double m12,m13,m23,m;
+	double pt1,pt2,pt3;
+	double eta1,eta2,eta3;
+
 
 	t->Branch("m12",&m12);
 	t->Branch("m13",&m13);
 	t->Branch("m23",&m23);
+
+
+	t->Branch("pt1",&pt1);
+	t->Branch("pt2",&pt2);
+	t->Branch("pt3",&pt3);
+
+	t->Branch("eta1",&eta1);
+	t->Branch("eta2",&eta2);
+	t->Branch("eta3",&eta3);
+
 	t->Branch("m",&m);
 
-	TH1F *tauPT= new TH1F("tauPT","p_{T}(#tau), GeV ",50,0,20);
+	/*	TH1F *tauPT= new TH1F("tauPT","p_{T}(#tau), GeV ",50,0,20);
 	TH1F *tauETA= new TH1F("tauETA","#eta(#tau) ",50,-5,5);
 
 	TH1F *ThreeMuPT= new TH1F("ThreeMuPT","p_{T}(3#mu), GeV ",50,0,20);
 	TH1F *ThreeMuETA= new TH1F("ThreeMuETA","#eta(3#mu) ",50,-5,5);
-
+	*/
 
 	int tau_category(0);
 	int threemu_category(0);
@@ -86,160 +149,62 @@ int main() {
 
 	std::vector<TString> Files;
 	GetVectorString(Files, FileList);
-
+	std::vector<std::vector<TLorentzVector> > SignalMuons;
 	Tools Tls(Files);
 	Int_t nentries = Tls.Get_Entries();
 
-	std::vector<TLorentzVector> Muons;
 
-	std::vector<TLorentzVector> MuonsPos;
-	std::vector<TLorentzVector> MuonsNeg;
-	std::vector<TLorentzVector> SortedMuons;
-	std::vector<TLorentzVector> Sources;
-	std::vector<int> Muon_source;
-	std::vector<int> Muons_charge;
-	std::vector<int> Muon_source_index;
 
 	for (int i = 0; i < nentries; i++) {
-	  Muons.clear();
-	  SortedMuons.clear();
-	  MuonsPos.clear();
-	  MuonsNeg.clear();
-	  Muon_source.clear();
-	  Muon_source_index.clear();
-	  Muons_charge.clear();
-
+	  SignalMuons.clear();
 	  Tls.Get_Event(i);
 	  TLorentzVector TauLV;
-	  bool tau_found(false);
-	  bool threemu_found(false);
 	  for(int isigp=0; isigp< Tls.NSignalParticles(); isigp++){
-	    std::cout<<"signal_particle id:  "<< Tls.SignalParticle_pdgId(isigp) << std::endl;
-	    Tls.SignalParticle_p4(isigp).Print();
+	    std::vector<std::pair<int,TLorentzVector> > temp;
 	    for(int j=0; j< Tls.NDecayProducts(isigp); j++){
-	      std::cout<<"--- decay  "<< Tls.SignalParticle_child_pdgId(isigp,j) << "    " << Tls.NChildDecayProducts(j) <<std::endl;
-	      std::cout<<"  N  "<< Tls.NChildChildProducts(isigp,j)<<std::endl;
-	      Tls.SignalParticle_childp4(isigp,j).Print();
-	      if(Tls.SignalParticle_child_pdgId(isigp,j)==13)MuonsNeg.push_back(Tls.SignalParticle_childp4(isigp,j));
-	      if(Tls.SignalParticle_child_pdgId(isigp,j)==-13)MuonsPos.push_back(Tls.SignalParticle_childp4(isigp,j));
-
-	      TLorentzVector Mass(0,0,0,0);
-	      for(int k=0; k< Tls.NChildDecayProducts(j); k++){
-		std::cout<<"  -------  "  << Tls.SignalParticle_child_decay_pdgId(j,k) << std::endl;
-		Tls.SignalParticle_child_decay_p4(j,k).Print();
-		if(Tls.SignalParticle_child_decay_pdgId(j,k)==13)MuonsNeg.push_back(Tls.SignalParticle_child_decay_p4(j,k));
-		if(Tls.SignalParticle_child_decay_pdgId(j,k)==-13)MuonsPos.push_back(Tls.SignalParticle_child_decay_p4(j,k));
-
-		Mass+=Tls.SignalParticle_child_decay_p4(j,k);
+	      //	      std::cout<<"id and mass   "<< Tls.SignalParticle_child_pdgId(isigp,j)<< "    "<<Tls.SignalParticle_childp4(isigp,j).M() <<  std::endl;
+	      if(abs(Tls.SignalParticle_child_pdgId(isigp,j))==13 ){
+		temp.push_back(std::make_pair(Tls.SignalParticle_child_pdgId(isigp,j),Tls.SignalParticle_childp4(isigp,j)));
 	      }
-	      std::cout<<" Mass   "<< Mass.M()<< std::endl;
-	      if(abs(Tls.SignalParticle_child_pdgId(isigp,j))==15){
-		tau_found = true;
-		TauLV=Tls.SignalParticle_childp4(isigp,j);
-	      }
-
-	      if(abs(Tls.SignalParticle_child_pdgId(isigp,j))==13){
-
-
-
-		Muons.push_back(Tls.SignalParticle_childp4(isigp,j));
-		Muon_source.push_back(Tls.SignalParticle_pdgId(isigp));
-		Muon_source_index.push_back(isigp);
-		Sources.push_back(Tls.SignalParticle_p4(isigp));
-		int muoncharge(0.);
-		if(Tls.SignalParticle_child_pdgId(isigp,j)==13)muoncharge=-1;
-		if(Tls.SignalParticle_child_pdgId(isigp,j)==-13)muoncharge=1;
-		Muons_charge.push_back(muoncharge);
-	      }
-	    }
-	  }
-
-	  if(Muons.size() > 2) threemu_found=true;
-
-	  std::cout<<"  neg: "<< MuonsNeg.size()  << "  pos  " <<MuonsPos.size() << std::endl;
-
-
-
-	  if(tau_found){
-	    tau_category++;
-	    tauPT->Fill(TauLV.Pt());
-	    tauETA->Fill(TauLV.Eta());
-	  }
-
-	  if((MuonsNeg.size() + MuonsPos.size()) ==3){
-	    TLorentzVector OsMuon(0,0,0,0);
-	    TLorentzVector Ss1Muon(0,0,0,0);
-	    TLorentzVector Ss2Muon(0,0,0,0);
-	    ///	    std::cout<<" Neg:  "<< MuonsNeg.size() << "  Pos:  "<< MuonsPos.size() << std::endl;
-	    if(MuonsNeg.size()==1 && MuonsPos.size() ==2){
-	      OsMuon = MuonsNeg.at(0);
-	      Ss1Muon =  MuonsPos.at(0);
-	      Ss2Muon =  MuonsPos.at(1);
-	    }
-
-	    if(MuonsNeg.size()==2 && MuonsPos.size() ==1){
-	      OsMuon = MuonsPos.at(0);
-	      Ss1Muon =  MuonsNeg.at(0);
-	      Ss2Muon =  MuonsNeg.at(1);
-	    }
-
-	    //	    OsMuon.Print();
-	    //	    Ss1Muon.Print();
-	    //	    Ss2Muon.Print();
-
-	    m12 = (OsMuon+Ss1Muon).M();
-	    m23 = (Ss1Muon+ Ss2Muon).M();
-	    m13 = (OsMuon + Ss2Muon).M();
-
-	    std::cout<<" m12:   "<< m12 << std::endl;
-	    std::cout<<" m13:   "<< m13 << std::endl;
-	    std::cout<<" m23:   "<< m23 << std::endl;
-
-	    OsMuon.Print();
-	    Ss1Muon.Print();
-	    Ss2Muon.Print();
-
-
-	    m = (OsMuon+Ss1Muon + Ss2Muon).M();
-	    t->Fill();
-
-	  }
-
-	  if(threemu_found){
-	    TLorentzVector ThreeMuLV(0,0,0,0);
-	    //	    std::cout<<"--- "<< std::endl;
-	    for(int i=0; i < Muon_source.size(); i++){
-	      ThreeMuLV+=Muons.at(i);
-	      //	      std::cout<<"Muons:  "<<Muon_source.at(i) << "    index:   " <<Muon_source_index.at(i) <<" charge:   " << Muons_charge.at(i) <<std::endl;
-	      for(int j=0; j< Tls.NDecayProducts(Muon_source_index.at(i)); j++){
-
-		//		std::cout<<" ====  decay:  "<< Tls.SignalParticle_child_pdgId(Muon_source_index.at(i),j) <<"   decay producsts  " << Tls.NChildDecayProducts(j) <<std::endl;
-		TLorentzVector massCheck(0,0,0,0);
-		for(int k =0; k < Tls.NChildDecayProducts(j); k ++){
-		  massCheck+=Tls.SignalParticle_child_decay_p4(j,k);
-		  //		  Tls.SignalParticle_child_decay_p4(j,k).Print();
-		  //		  std::cout<<"========= "<<Tls.SignalParticle_child_decay_pdgId(j,k) << std::endl;
+	      for(int k=0; k<Tls.NChildChildProducts(isigp,j); k++){
+		//		std::cout<<"--------------   "<<  Tls.SignalParticle_child_child_pdgId(isigp,j,k) << "    "<<Tls.SignalParticle_child_child_p4(isigp,j,k).Px() <<  std::endl;
+		if(abs(Tls.SignalParticle_child_child_pdgId(isigp,j,k))==13){
+		  temp.push_back(std::make_pair(Tls.SignalParticle_child_child_pdgId(isigp,j,k),Tls.SignalParticle_child_child_p4(isigp,j,k)));
 		}
-		//		std::cout<<"Mass:  "<< massCheck.M() <<std::endl;
-		//		massCheck.Print();
 	      }
-
-	      //	    Sources.at(i).Print();
 	    }
-
-
-
-
-	    ThreeMuPT->Fill(ThreeMuLV.Pt());
-	    ThreeMuETA->Fill(ThreeMuLV.Eta());
-	    threemu_category++;
-	    
-
+	    //	    std::vector<TLorentzVector>  vec=sortMuons(temp);
+	    //	    for (auto &v:vec){ v.Print();}
+	    SignalMuons.push_back(sortMuons(temp));
 	  }
 
 
+	  for (auto &i:SignalMuons){
+	    TLorentzVector osmuon=i.at(0);
+	    TLorentzVector ss1muon=i.at(1);
+	    TLorentzVector ss2muon=i.at(2);
+
+	    m12 = (osmuon+ss1muon).M();
+	    m13 = (osmuon+ss2muon).M();
+	    m23 = (ss1muon+ss2muon).M();	    
+	    m   = (osmuon+ss1muon+ss2muon).M();
+
+	    /*	    std::cout<<"px1  "<< osmuon.Px() << std::endl;
+	    std::cout<<"px2  "<< ss1muon.Px() << std::endl;
+	    std::cout<<"px3  "<< ss2muon.Px() << std::endl;
+
+	    std::cout<<"m12  "<< m12 <<std::endl;
+	    std::cout<<"m13  "<< m13 <<std::endl;
+	    std::cout<<"m23  "<< m23 <<std::endl;
+	    */
+	    pt1=osmuon.Pt();   eta1=osmuon.Eta();
+	    pt2=ss1muon.Pt();  eta2=ss1muon.Eta();
+	    pt3=ss2muon.Pt();  eta3=ss2muon.Eta();
+
+	    t->Fill();
+	  }
 	}
-	t->Write();
+
 	file->Write();
 
 	std::cout << "Total Events number analysed:  "<<nentries<< " With Tau Lepton:  "<< tau_category << " With three mu  " << threemu_category <<std::endl;

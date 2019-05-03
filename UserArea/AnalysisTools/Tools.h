@@ -96,8 +96,17 @@ class Tools{
 												     Ntp->SignalParticle_child_decay_p4->at(i).at(j).at(3),
 												     Ntp->SignalParticle_child_decay_p4->at(i).at(j).at(0));}
 
-  int NChildChildProducts(unsigned int i, unsigned int j){std::cout<< Ntp->SignalParticle_child_child_pdgId->at(i).at(j).size() << std::endl; return 999;}
+  int NChildChildProducts(unsigned int i, unsigned int j){return Ntp->SignalParticle_child_child_pdgId->at(i).at(j).size();}
+  int SignalParticle_child_child_pdgId(unsigned int i, unsigned int j, unsigned int k){return Ntp->SignalParticle_child_child_pdgId->at(i).at(j).at(k);}
+
+
+  TLorentzVector SignalParticle_child_child_p4(unsigned int i, unsigned int j, unsigned int k){return TLorentzVector(Ntp->SignalParticle_child_child_p4->at(i).at(j).at(k).at(1),
+														     Ntp->SignalParticle_child_child_p4->at(i).at(j).at(k).at(2),
+														     Ntp->SignalParticle_child_child_p4->at(i).at(j).at(k).at(3),
+														     Ntp->SignalParticle_child_child_p4->at(i).at(j).at(k).at(0));}
+
   int SignalParticle_child_decay_pdgId(unsigned int i, unsigned int j){return Ntp->SignalParticle_child_decay_pdgid->at(i).at(j);}
+
 
 };
 
