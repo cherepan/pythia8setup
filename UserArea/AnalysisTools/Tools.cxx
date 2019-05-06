@@ -81,6 +81,7 @@ unsigned int Tools::GetType(TString name){
   if(name=="dprhomumu")             return Type::DpRhoMuMu;
   if(name=="dpomegamumu")           return Type::DpOmegaMuMu;
   if(name=="dpomegamumupi0")        return Type::DpOmegaMuMuPi0;
+  if(name=="signal")                return Type::Signal;
 
   std::cout << "ERROR: Type " << name << " UNKNOWN!!!! " << std::endl;
   return Type::unknown;
@@ -157,6 +158,15 @@ int Tools::DecayID(unsigned int i){
 
   if(abs(Ntp->SignalParticle_pdgId->at(i)) == 431){ 
     for (unsigned int j =0; j< Ntp->SignalParticle_child_pdgId->at(i).size(); j++){
+
+      if(abs(Ntp->SignalParticle_child_pdgId->at(i).at(j))==15){
+	std::vector<int> lastdecay;
+        for(unsigned int k=0; k < Ntp->SignalParticle_child_child_pdgId->at(i).at(j).size(); k++){
+          lastdecay.push_back(Ntp->SignalParticle_child_child_pdgId->at(i).at(j).at(k));
+        }
+        if(AnalyzeMesonDecay(lastdecay) == 5) return GetType("signal");
+      }
+
       if(Ntp->SignalParticle_child_pdgId->at(i).at(j)==221){
 	std::vector<int> lastdecay;
 	for(unsigned int k=0; k < Ntp->SignalParticle_child_child_pdgId->at(i).at(j).size(); k++){
@@ -239,9 +249,17 @@ int Tools::AnalyzeMesonDecay(std::vector<int> v){
 
   if(   std::find(v.begin(), v.end(), 13) != v.end() && std::find(v.begin(), v.end(), -13) != v.end() && v.size() ==2 ) return 1;
   if(   std::find(v.begin(), v.end(), 13) != v.end() && std::find(v.begin(), v.end(), -13) != v.end() && std::find(v.begin(), v.end(), 22) != v.end()  && v.size() ==3 ) return 2;
+
   if(   std::find(v.begin(), v.end(), 13) != v.end() && std::find(v.begin(), v.end(), -13) != v.end() && std::find(v.begin(), v.end(), 111) != v.end()  && v.size() ==3 ) return 3;
   if(   std::find(v.begin(), v.end(), 13) != v.end() && std::find(v.begin(), v.end(), -13) != v.end() && std::find(v.begin(), v.end(), 111) != v.end()  &&  std::find(v.begin(), v.end(), 22) != v.end()  && v.size() ==4 ) return 4;
-
+  
+  int nmu(0);
+  if(v.size()==3){
+    for (auto &i:v){
+      if(abs(i)==13){nmu++;}
+    }
+    if(nmu==3) return 5;
+  }
   std::cout<<"Cant analyze meson decay, return 0;"<<std::endl;
   return 0;
 }

@@ -90,6 +90,7 @@ class Tools{
 	     DpRhoMuMu=4111131,
 	     DpOmegaMuMu=4112231,
 	     DpOmegaMuMuPi0=4112233,
+	     Signal=555,
 	     unknown=999
 	     // add here more MC types
   };

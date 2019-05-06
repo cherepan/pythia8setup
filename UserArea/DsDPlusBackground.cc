@@ -66,8 +66,8 @@ int main(int argc,char **argv) {
   // event loop
   std::vector<int> SignalParticleList;
   std::vector<int> SignalParticleIndex;
-  SignalParticleList.push_back(431);
-  SignalParticleList.push_back(411);
+  SignalParticleList.push_back(431);  // Ds
+  SignalParticleList.push_back(411);  // Dp
   for(int iEvent = 0; iEvent < nEvent; ++iEvent){
     std::vector<int> muon_indices;
     std::vector<int> tau_indices;
@@ -175,7 +175,7 @@ int main(int argc,char **argv) {
 	SignalParticle_child_decay_pdgid.at(SignalParticle_child_decay_pdgid.size() - 1).push_back(pythia.event[j].id());
 	SignalParticle_child_decay_p4.at(SignalParticle_child_decay_pdgid.size() - 1).push_back(ip4);
 	
-	if(DEBUG)  	std::cout<<" sub sub chiled id   "<<pythia.event[j].name() <<   "  "<<ip4.at(1) <<std::endl;
+	if(DEBUG)  	std::cout<<" sub sub child id   "<<pythia.event[j].name() <<   "  "<<ip4.at(1) <<std::endl;
 	
       }
     }

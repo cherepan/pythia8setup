@@ -113,8 +113,9 @@ int main() {
 	  Tls.Get_Event(i);
 	  TLorentzVector TauLV;
 	  for(int isigp=0; isigp< Tls.NSignalParticles(); isigp++){
-	    //	    Tls.PrintDecay(isigp);
+	    Tls.PrintDecay(isigp);
 	    SignalIDS.push_back(Tls.DecayID(isigp));
+	    std::cout<<"   "<< Tls.DecayID(isigp) <<std::endl;
 	    std::vector<std::pair<int,TLorentzVector> > temp;
 	    for(int j=0; j< Tls.NDecayProducts(isigp); j++){
 	      //	      std::cout<<"id and mass   "<< Tls.SignalParticle_child_pdgId(isigp,j)<< "    "<<Tls.SignalParticle_childp4(isigp,j).M() <<  std::endl;
@@ -136,6 +137,7 @@ int main() {
 	  for(unsigned int i=0; i< SignalMuons.size(); i++){
 	    //	  for (auto &i:SignalMuons){
 	    id=SignalIDS.at(i);
+	    if(id!=0){
 	    TLorentzVector osmuon=SignalMuons.at(i).at(0);
 	    TLorentzVector ss1muon=SignalMuons.at(i).at(1);
 	    TLorentzVector ss2muon=SignalMuons.at(i).at(2);
@@ -156,8 +158,9 @@ int main() {
 	    pt1=osmuon.Pt();   eta1=osmuon.Eta();
 	    pt2=ss1muon.Pt();  eta2=ss1muon.Eta();
 	    pt3=ss2muon.Pt();  eta3=ss2muon.Eta();
-
+	    std::cout<<"------- id "<< id << std::endl;
 	    t->Fill();
+	    }
 	  }
 	}
 
