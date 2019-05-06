@@ -7,10 +7,19 @@
 
 #pragma link C++ class std::vector<std::vector<float> >+;
 #pragma link C++ class std::vector<std::vector<std::vector<float> > >+;
+#pragma link C++ class std::vector<std::vector<std::vector<std::vector<float> > > >+;
+#pragma link C++ class std::vector<std::vector<std::vector<std::vector<std::vector<float> > > > >+;
+#pragma link C++ class std::vector<std::vector<std::vector<std::vector<std::vector<std::vector<float> > > > > >+;
+
+#pragma link C++ class std::vector<std::vector<int> >+;
+#pragma link C++ class std::vector<std::vector<std::vector<int> > >+;
+#pragma link C++ class std::vector<std::vector<std::vector<std::vector<int> > > >+;
 
 #pragma link C++ class std::vector<std::vector<double> >+;
 #pragma link C++ class std::vector<std::vector<std::vector<double> > >+;
-
+#pragma link C++ class std::vector<std::vector<std::vector<std::vector<double> > > >+;
+#pragma link C++ class std::vector<std::vector<std::vector<std::vector<std::vector<double> > > > >+;
+#pragma link C++ class std::vector<std::vector<std::vector<std::vector<std::vector<std::vector<double> > > > > >+;
  
 #pragma link C++ namespace Pythia8;
 #pragma link C++ class Pythia8::Event+;

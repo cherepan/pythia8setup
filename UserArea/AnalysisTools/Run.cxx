@@ -47,56 +47,6 @@ void GetVectorString(std::vector<TString> &v,TString file){
   return;
 }
 
-std::vector<TLorentzVector> sortMuons(std::vector<std::pair<int,TLorentzVector> >  pairs){
-  int mum(0), mup(0);
-  TLorentzVector OSMu(0,0,0,0);
-  TLorentzVector SSMu1(0,0,0,0);
-  TLorentzVector SSMu2(0,0,0,0);
-  for (auto &i:pairs){
-    if(i.first == 13)mum++;
-    if(i.first == -13)mup++;
-  }
-  if(mup==1&&mum==2){
-    int nss=0;
-    for (auto &i:pairs){
-      if(i.first ==-13){
-	OSMu=i.second;
-      }
-      if(i.first==13 && nss==0){
-	nss++;
-	SSMu1=i.second;
-      }
-      if(i.first==13 && nss==1){
-	SSMu2=i.second;
-      }
-    }
-  }
-
-  if(mup==2&&mum==1){
-    int nss=0;
-
-    for (auto &i:pairs){
-      if(i.first ==13){
-        OSMu=i.second;
-      }
-      if(i.first==-13 && nss==0){
-        nss++;
-        SSMu1=i.second;
-      }
-      if(i.first==-13 && nss==1){
-        SSMu2=i.second;
-      }
-    }
-  }
-
-  std::vector<TLorentzVector> out;
-  out.push_back(OSMu);
-  out.push_back(SSMu1);
-  out.push_back(SSMu2);
-  return out;
-}
-
-
 int main() {
         std::cout << "Program is Starting" << endl;
 	system("date");
@@ -112,7 +62,7 @@ int main() {
 	double m12,m13,m23,m;
 	double pt1,pt2,pt3;
 	double eta1,eta2,eta3;
-
+	double id;
 
 	t->Branch("m12",&m12);
 	t->Branch("m13",&m13);
@@ -129,6 +79,7 @@ int main() {
 
 	t->Branch("m",&m);
 
+	t->Branch("id",&id);
 	/*	TH1F *tauPT= new TH1F("tauPT","p_{T}(#tau), GeV ",50,0,20);
 	TH1F *tauETA= new TH1F("tauETA","#eta(#tau) ",50,-5,5);
 
@@ -150,6 +101,7 @@ int main() {
 	std::vector<TString> Files;
 	GetVectorString(Files, FileList);
 	std::vector<std::vector<TLorentzVector> > SignalMuons;
+	std::vector<int> SignalIDS;
 	Tools Tls(Files);
 	Int_t nentries = Tls.Get_Entries();
 
@@ -157,9 +109,12 @@ int main() {
 
 	for (int i = 0; i < nentries; i++) {
 	  SignalMuons.clear();
+	  SignalIDS.clear();
 	  Tls.Get_Event(i);
 	  TLorentzVector TauLV;
 	  for(int isigp=0; isigp< Tls.NSignalParticles(); isigp++){
+	    //	    Tls.PrintDecay(isigp);
+	    SignalIDS.push_back(Tls.DecayID(isigp));
 	    std::vector<std::pair<int,TLorentzVector> > temp;
 	    for(int j=0; j< Tls.NDecayProducts(isigp); j++){
 	      //	      std::cout<<"id and mass   "<< Tls.SignalParticle_child_pdgId(isigp,j)<< "    "<<Tls.SignalParticle_childp4(isigp,j).M() <<  std::endl;
@@ -175,14 +130,15 @@ int main() {
 	    }
 	    //	    std::vector<TLorentzVector>  vec=sortMuons(temp);
 	    //	    for (auto &v:vec){ v.Print();}
-	    SignalMuons.push_back(sortMuons(temp));
+	    SignalMuons.push_back(Tls.sortMuons(temp));
 	  }
 
-
-	  for (auto &i:SignalMuons){
-	    TLorentzVector osmuon=i.at(0);
-	    TLorentzVector ss1muon=i.at(1);
-	    TLorentzVector ss2muon=i.at(2);
+	  for(unsigned int i=0; i< SignalMuons.size(); i++){
+	    //	  for (auto &i:SignalMuons){
+	    id=SignalIDS.at(i);
+	    TLorentzVector osmuon=SignalMuons.at(i).at(0);
+	    TLorentzVector ss1muon=SignalMuons.at(i).at(1);
+	    TLorentzVector ss2muon=SignalMuons.at(i).at(2);
 
 	    m12 = (osmuon+ss1muon).M();
 	    m13 = (osmuon+ss2muon).M();

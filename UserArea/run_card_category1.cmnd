@@ -1,0 +1,47 @@
+! minbias production at the LHC
+Beams:idA = 2212 ! first incoming beam is a 2212, i.e. a proton.
+Beams:idB = 2212 ! second beam is also a proton.11
+Beams:eCM = 13000. ! the cm energy of collisions.
+SoftQCD:minBias = on ! switch on the process minBias
+431:onMode = off
+431:onIfMatch = 13 14 221  ! Ds -> mu nu eta
+431:onIfMatch = 13 14 333  ! Ds -> mu nu phi
+431:onIfMatch = 13 14 331  ! Ds -> mu nu eta prime
+
+
+
+411:onMode = off
+411:onIfMatch = 13 14 221  ! D+ -> mu nu eta
+411:onIfMatch = 13 14 333  ! D+ -> mu nu phi
+411:onIfMatch = 13 14 331  ! D+ -> mu nu eta prime
+411:onIfMatch = 13 14 113  ! D+ -> rho mu nnu
+411:onIfMatch = 13 14 223  ! D+ -> omega mu nnu
+
+
+
+221:onMode = off
+221:onIfMatch =13 13  ! eta -> mu mu
+221:onIfMatch =22 13 13 ! eta -> mu mu gamma
+221:onIfMatch =13 13 22 111 ! eta -> mu mu gamma pi0
+
+333:onMode = off
+333:onIfMatch = 13 13 ! phi -> mu mu
+333:onIfMatch = 13 13 22 ! phi -> mu mu gamma
+
+331:onMode = off
+331:onIfMatch = 13 13 ! eta prime -> mu mu 
+331:onIfMatch = 13 13 22 ! eta prime -> mu mu gamma
+
+
+223:onMode = off
+223:onIfMatch = 13 13 ! omega -> mu mu 
+223:onIfMatch = 111  13 13  ! omega  -> mu mu pi0
+
+113:onMode = off
+113:onIfMatch = 13 13 ! rho -> mu mu
+
+Main:numberOfEvents = 100000       ! number of events to generate
+
+
+
+

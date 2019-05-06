@@ -30,6 +30,7 @@ DEFS  	      = -DSTANDALONE=1
 LIBS          = $(ROOTLIBS) $(SHAREDLIBFLAGS)
 
 TARGETS       =	Tools \
+		DecayID \
 		ReadNtuple 
 
 

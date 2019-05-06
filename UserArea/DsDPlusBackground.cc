@@ -155,11 +155,11 @@ int main(int argc,char **argv) {
 	SignalParticle_child_child_p4.push_back(temp_child_child_p4);
 	SignalParticle_child_child_pdgId.push_back(temp_child_child_pdgid);
       }
-      std::cout<<"size: "<< SignalParticle_child_child_pdgId.size() << std::endl;
-      for (auto &j:SignalParticle_pdgId){
+      //std::cout<<"size: "<< SignalParticle_child_child_pdgId.size() << std::endl;
+      //      for (auto &j:SignalParticle_pdgId){
 
-	std::cout<< j <<std::endl;
-      }
+      //	std::cout<< j <<std::endl;
+      //      }
 
     if(DEBUG)      std::cout<<" subchild_idx size  "<< subchild_idx.size() << std::endl;
     for (auto &i:subchild_idx){

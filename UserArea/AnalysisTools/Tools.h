@@ -73,6 +73,28 @@ class Tools{
   virtual Int_t Get_EventIndex();
   virtual TString Get_File_Name();
 
+  enum Type {DsEtaMuMu=4312211,
+	     DsEtaMuMuGamma=4312212,
+	     DsEtaMuMuGammaPi0=4312214,
+	     DsPhiMuMu=4313331,
+	     DsPhiMuMuGamma=4313332,
+	     DsEtaPrimeMuMu=4313311,
+	     DsEtaPrimeMuMuGamma=4313311,
+             DpEtaMuMu=4112211,
+             DpEtaMuMuGamma=4112212,
+             DpEtaMuMuGammaPi0=4112214,
+             DpPhiMuMu=4113331,
+             DpPhiMuMuGamma=4113332,
+             DpEtaPrimeMuMu=4113311,
+             DpEtaPrimeMuMuGamma=4113312,
+	     DpRhoMuMu=4111131,
+	     DpOmegaMuMu=4112231,
+	     DpOmegaMuMuPi0=4112233,
+	     unknown=999
+	     // add here more MC types
+  };
+
+
   int NSignalParticles(){return  Ntp->SignalParticle_pdgId->size();}
   float SignalParticle_pdgId(unsigned int i){return Ntp->SignalParticle_pdgId->at(i);}
   TLorentzVector  SignalParticle_p4(unsigned int i){return TLorentzVector(Ntp->SignalParticle_p4->at(i).at(1),
@@ -107,6 +129,13 @@ class Tools{
 
   int SignalParticle_child_decay_pdgId(unsigned int i, unsigned int j){return Ntp->SignalParticle_child_decay_pdgid->at(i).at(j);}
 
+
+
+  int DecayID(unsigned int i);
+  void PrintDecay(unsigned int i);
+  int AnalyzeMesonDecay(std::vector<int> v);
+  unsigned int GetType(TString name);
+  std::vector<TLorentzVector> sortMuons(std::vector<std::pair<int,TLorentzVector> >  pairs);
 
 };
 
