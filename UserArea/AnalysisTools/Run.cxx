@@ -62,6 +62,7 @@ int main() {
 	double m12,m13,m23,m;
 	double pt1,pt2,pt3;
 	double eta1,eta2,eta3;
+	float costheta;
 	double id;
 
 	t->Branch("m12",&m12);
@@ -76,6 +77,8 @@ int main() {
 	t->Branch("eta1",&eta1);
 	t->Branch("eta2",&eta2);
 	t->Branch("eta3",&eta3);
+
+	t->Branch("costheta",&costheta);
 
 	t->Branch("m",&m);
 
@@ -113,9 +116,9 @@ int main() {
 	  Tls.Get_Event(i);
 	  TLorentzVector TauLV;
 	  for(int isigp=0; isigp< Tls.NSignalParticles(); isigp++){
-	    Tls.PrintDecay(isigp);
+	    //	    Tls.PrintDecay(isigp);
 	    SignalIDS.push_back(Tls.DecayID(isigp));
-	    std::cout<<"   "<< Tls.DecayID(isigp) <<std::endl;
+	    //	    std::cout<<"   "<< Tls.DecayID(isigp) <<std::endl;
 	    std::vector<std::pair<int,TLorentzVector> > temp;
 	    for(int j=0; j< Tls.NDecayProducts(isigp); j++){
 	      //	      std::cout<<"id and mass   "<< Tls.SignalParticle_child_pdgId(isigp,j)<< "    "<<Tls.SignalParticle_childp4(isigp,j).M() <<  std::endl;
@@ -147,6 +150,10 @@ int main() {
 	    m23 = (ss1muon+ss2muon).M();	    
 	    m   = (osmuon+ss1muon+ss2muon).M();
 
+
+
+	    TLorentzVector Tau = osmuon+ss1muon+ss2muon;
+
 	    /*	    std::cout<<"px1  "<< osmuon.Px() << std::endl;
 	    std::cout<<"px2  "<< ss1muon.Px() << std::endl;
 	    std::cout<<"px3  "<< ss2muon.Px() << std::endl;
@@ -158,7 +165,74 @@ int main() {
 	    pt1=osmuon.Pt();   eta1=osmuon.Eta();
 	    pt2=ss1muon.Pt();  eta2=ss1muon.Eta();
 	    pt3=ss2muon.Pt();  eta3=ss2muon.Eta();
-	    std::cout<<"------- id "<< id << std::endl;
+	    //	    std::cout<<"------- id "<< id << std::endl;
+	    //	    costheta=0;
+	    //	    if(id ==555){
+	    //	      std::cout<<"------- id "<< id << std::endl;
+	      //	      std::cout<<"m12  "<< m12 <<std::endl;
+	      //	      std::cout<<"m13  "<< m13 <<std::endl;
+
+
+	      TVector3 Rotate=Tau.Vect();
+	      TLorentzVector TauRotated = Tau;
+	      TauRotated.SetVect(Tls.Rotate(TauRotated.Vect(), Rotate));
+	      std::cout<<"rotated  "<< std::endl;
+	      //	      TauRotated.Print();
+
+	      TLorentzVector TauRest = Tls.Boost( TauRotated, TauRotated);
+	      //	      TauRest.Print();
+
+
+	      TLorentzVector MuOsRotated = osmuon;
+	      TLorentzVector MuSS1Rotated = ss1muon;
+	      TLorentzVector MuSS2Rotated = ss2muon;
+
+
+	      MuOsRotated.SetVect(Tls.Rotate( MuOsRotated.Vect(), Rotate));
+	      MuSS1Rotated.SetVect(Tls.Rotate( MuSS1Rotated.Vect(), Rotate));
+	      MuSS2Rotated.SetVect(Tls.Rotate( MuSS2Rotated.Vect(), Rotate));
+
+	      TLorentzVector OsMuTauRest = Tls.Boost(MuOsRotated, TauRotated);
+	      TLorentzVector Ss1MuTauRest = Tls.Boost(MuSS1Rotated, TauRotated);
+	      TLorentzVector Ss2MuTauRest = Tls.Boost(MuSS2Rotated, TauRotated);
+
+
+	      TVector3 nss1= Ss1MuTauRest.Vect()*(1/Ss1MuTauRest.Vect().Mag());
+	      TVector3 nss2= Ss2MuTauRest.Vect()*(1/Ss2MuTauRest.Vect().Mag());
+	      TVector3 noss= OsMuTauRest.Vect()*(1/OsMuTauRest.Vect().Mag());
+	      TVector3 nPerp= (nss1.Cross(nss2))*(1/(nss1.Cross(nss2)).Mag());
+
+
+	      std::cout<<"   "<< nss1*nPerp <<"  " << nss2*nPerp << "   "<< noss*nPerp << std::endl;
+
+
+	      //	      OsMuTauRest.Print();
+	      //	      (Ss1MuTauRest + Ss2MuTauRest).Print();
+
+
+	      TLorentzVector Pi1Rotated = osmuon;
+	      Pi1Rotated.SetVect(Tls.Rotate(Pi1Rotated.Vect(), Rotate));
+
+	      TLorentzVector Pi2Rotated = ss2muon;
+	      Pi2Rotated.SetVect(Tls.Rotate(Pi2Rotated.Vect(), Rotate));
+
+	      TLorentzVector PhiRest=Tls.Boost(TauRotated,TauRotated);
+	      TLorentzVector Pi1Rest = Tls.Boost(Pi1Rotated,TauRotated);
+	      TLorentzVector Pi2Rest = Tls.Boost(Pi2Rotated,TauRotated);
+	      TVector3 n(0,0,1);
+	      TVector3 r = Pi1Rest.Vect()*(1/Pi1Rest.Vect().Mag());
+	      //	      r.Print();
+	      costheta = noss*nPerp;
+	      //	      std::cout<<"costheta   "<< costheta << std::endl;
+	      //	      PhiRest.Print();
+	      //	      Pi1Rest.Print();
+	      //	      Pi2Rest.Print();
+
+
+	      //	      TLorentzVector PhiRest=Tls.Boost(Phi,Phi);
+	      //	      PhiRest.Print();
+
+	      //	    }
 	    t->Fill();
 	    }
 	  }

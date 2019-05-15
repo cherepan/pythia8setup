@@ -23,8 +23,6 @@ void removeDuplicates(std::vector<int>& vec)
 
 int main(int argc,char **argv) {
   bool DEBUG(false);
-  bool doTaus(false);
-  bool doThreeMu(true);
   Pythia pythia; 
   pythia.readFile(argv[1]);
   pythia.readString("Random:setSeed = on");
@@ -87,6 +85,7 @@ int main(int argc,char **argv) {
 
     subchild_idx.clear();
     if (!pythia.next()) continue;
+    if(DEBUG)std::cout<<"--------------------------------- "<<std::endl;
     for (int i = 0; i < pythia.event.size(); ++i) {
       int id=abs(pythia.event[i].id());
       if(std::find(SignalParticleList.begin(), SignalParticleList.end(), id) != SignalParticleList.end()){
