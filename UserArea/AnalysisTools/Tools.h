@@ -137,6 +137,17 @@ class Tools{
   int AnalyzeMesonDecay(std::vector<int> v);
   unsigned int GetType(TString name);
   std::vector<TLorentzVector> sortMuons(std::vector<std::pair<int,TLorentzVector> >  pairs);
+  TLorentzVector Boost(TLorentzVector pB, TLorentzVector frame);
+
+  TVector3 Rotate(TVector3 LVec, TVector3 Rot);
+
+
+  TMatrixT<double> convertToMatrix(TVectorT<double> V){
+    TMatrixT<double> M(V.GetNrows(),1);
+    for(int i=0; i < M.GetNrows(); i++){
+      M(i,0)=V(i);
+    } return M;
+  }
 
 };
 
