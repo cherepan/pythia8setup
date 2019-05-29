@@ -1,6 +1,10 @@
 universe     = vanilla
 rank         = memory
-executable   = short.sh
+executable   = Set.sh
+should_transfer_files = YES
+transfer_input_files = run_card.cmnd, softQcd.exe,pythiaROOT.h,softQcdDict_rdict.pcm
+arguments    = 1
+when_to_transfer_output = ON_EXIT
 output       = Set-Condor_$(cluster)_$(proccess).o
 error        = Set-Condor_$(cluster)_$(proccess).e
 log          = Set-Condor_$(cluster)_$(proccess).log

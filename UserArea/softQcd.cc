@@ -20,7 +20,7 @@ void removeDuplicates(std::vector<int>& vec)
 
 
 int main(int argc,char **argv) {
-  bool DEBUG(true);
+  bool DEBUG(false);
   bool doTaus(false);
   bool doThreeMu(true);
   Pythia pythia; 
@@ -35,6 +35,7 @@ int main(int argc,char **argv) {
   double t = 0.0;
   start = clock();
   int taucounter(0);
+  int mucounter(0);
   std::vector<float> SignalParticle_pdgId;
   std::vector<std::vector<float> > SignalParticle_p4;
   std::vector<std::vector<int> > SignalParticle_child_pdgId;
@@ -46,7 +47,7 @@ int main(int argc,char **argv) {
 
   std::vector<std::vector<int> > subchild_idx;
 
-  TFile *file = TFile::Open("res/output" + TString(argv[2]) +".root","recreate");
+  TFile *file = TFile::Open("output" + TString(argv[2]) +".root","recreate");
   TTree * tree = new TTree("tree","pythia_tree");
 
   tree->Branch("SignalParticle_pdgId",&SignalParticle_pdgId);
@@ -85,16 +86,23 @@ int main(int argc,char **argv) {
 	if( fabs(pythia.event[i].eta()) < 2.8 && pythia.event[i].pT() > 0.2){
 	  muon_indices.push_back(i);
 	  dump_index.push_back(i);
+
 	}
       }
     }
 
     std::vector<int> SignalParticleIndex;
     std::vector<int> SelectedIndexCollection;
-    if(tau_indices.size()>0 &&  muon_indices.size() <3) SelectedIndexCollection = tau_indices;
-    else if(muon_indices.size()>2) SelectedIndexCollection=dump_index;
+    //    if(tau_indices.size()>0 &&  muon_indices.size() <3) SelectedIndexCollection = tau_indices;
+    //    else if(muon_indices.size()>2) SelectedIndexCollection=dump_index;
     
-    if(!doTaus && muon_indices.size()>2)SelectedIndexCollection=muon_indices;
+
+    if(doThreeMu && muon_indices.size()>2){
+      //    if(!doTaus && muon_indices.size()>2){
+      SelectedIndexCollection=muon_indices;
+      mucounter++;
+    }
+    
 
     for ( auto &k : SelectedIndexCollection ) {
       for (auto &m : pythia.event[k].motherList()){
@@ -104,10 +112,14 @@ int main(int argc,char **argv) {
     removeDuplicates(SignalParticleIndex);
 
     if(SignalParticleIndex.size()!=0){
+    std::cout<<"  muon indices size  "<< muon_indices.size() << std::endl;
+    std::cout<<"  "<<    SignalParticleIndex.size() << std::endl;
+
       if(DEBUG)std::cout<<"N taus "<< tau_indices.size() <<" N three mu  " <<muon_indices.size() << std::endl;
       for (auto &m : SignalParticleIndex){
 	
 	if(DEBUG)std::cout<<"signal particle  "<< pythia.event[m].name() <<std::endl;
+	//	if()
 	SignalParticle_child_pdgId.push_back(std::vector<int>());
 	SignalParticle_childp4.push_back(std::vector<std::vector<float> >());
 	SignalParticle_pdgId.push_back(pythia.event[m].id());
@@ -132,7 +144,7 @@ int main(int argc,char **argv) {
 	  SignalParticle_child_pdgId.at(SignalParticle_child_pdgId.size() - 1).push_back(pythia.event[d].id());
 	  SignalParticle_childp4.at(SignalParticle_child_pdgId.size() - 1).push_back(ichildp4);
 	  subchild_idx.push_back(std::vector<int>());
-	  std::cout<<"================================>> daughters  "<< pythia.event[d].name() <<"   daughtersize " << pythia.event[d].daughterList().size()<<std::endl;
+	  //	  std::cout<<"================================>> daughters  "<< pythia.event[d].name() <<"   daughtersize " << pythia.event[d].daughterList().size()<<std::endl;
 	  for (auto &dd :  pythia.event[d].daughterList()){
 	    subchild_idx.at(subchild_idx.size() - 1).push_back(dd);
 	    if(DEBUG)   		{
@@ -165,7 +177,7 @@ int main(int argc,char **argv) {
 	  }
 	
 	  tree->Fill();
-      }
+    }
   
       
   // End event loop.
@@ -189,6 +201,7 @@ int main(int argc,char **argv) {
   
   cout << "\n" << "|------------------------------------------------------------|" << endl;
   cout<< "| Event generated: " <<  nEvent <<"  taus found: "<< taucounter<< "   per event: "<<(float)taucounter/(float)nEvent <<std::endl;
+  cout<< "| Event generated: " <<  nEvent <<"  threemu found: "<< mucounter<< "   per event: "<<(float)mucounter/(float)nEvent <<std::endl;
   cout << "|------------------------------------------------------------|" << "\n" << endl;
   // Done.
   return 0;
