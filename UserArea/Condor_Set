@@ -1,13 +1,10 @@
-universe     = vanilla
-rank         = memory
+universe     = vanilla      
+rank         = memory       
 executable   = Set.sh
-should_transfer_files = YES
-transfer_input_files = run_card.cmnd, softQcd.exe,pythiaROOT.h,softQcdDict_rdict.pcm
-arguments    = 1
-when_to_transfer_output = ON_EXIT
-output       = Set-Condor_$(cluster)_$(proccess).o
-error        = Set-Condor_$(cluster)_$(proccess).e
-log          = Set-Condor_$(cluster)_$(proccess).log
+arguments    = $(ProcId)
+output       = Set_62-Condor_$(cluster)_$(proccess).o  
+error        = Set_62-Condor_$(cluster)_$(proccess).e  
+log          = Set_62-Condor_$(cluster)_$(proccess).log  
 getenv       = True
-notification = Error
-queue  1
+notification = Error        
+queue  3

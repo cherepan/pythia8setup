@@ -47,7 +47,7 @@ int main(int argc,char **argv) {
 
   std::vector<std::vector<int> > subchild_idx;
 
-  TFile *file = TFile::Open("output" + TString(argv[2]) +".root","recreate");
+  TFile *file = TFile::Open("res/output" + TString(argv[2]) +".root","recreate");
   TTree * tree = new TTree("tree","pythia_tree");
 
   tree->Branch("SignalParticle_pdgId",&SignalParticle_pdgId);
