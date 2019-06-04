@@ -7,7 +7,7 @@
 -include ../config.mk
 
 # A few variables used in this Makefile:
-EX           := softQcd DsDPlusBackground DsTauThreeMu
+EX           := softQcd DsDPlusBackground DsTauThreeMu minbias
 EXE          := $(addsuffix .exe,$(EX))
 PYTHIA8      ?= $(PWD)/..
 STATICLIB    := $(PYTHIA8)/lib/archive/libpythia8.a
@@ -46,6 +46,11 @@ DsTauThreeMu: $(STATICLIB) DsTauThreeMu.cc
 	rootcint -f DsTauThreeMuDict.cc -c $(DICTCXXFLAGS) pythiaROOT.h pythiaLinkdef.h
 	$(CXX) $(ROOTCXXFLAGS) DsTauThreeMuDict.cc $@.cc -o $@.exe $(LDFLAGS1)
 
+minbias: $(STATICLIB) minbias.cc
+	rootcint -f minbiasDict.cc -c $(DICTCXXFLAGS) pythiaROOT.h pythiaLinkdef.h
+	$(CXX) $(ROOTCXXFLAGS) minbiasDict.cc $@.cc -o $@.exe $(LDFLAGS1)
+
+
 # Rule to build full dictionary
 dict: $(SHAREDLIB)
 	rootcint -f pythiaDict.cc -c $(DICTCXXFLAGS) \
@@ -67,5 +72,5 @@ $(SHAREDLIB):
 # Clean up
 clean:
 	rm -f $(EXE) hist.root pythiaDict.* *.pcm *~\
-               softQcdDict.cc softQcdDict.h DsDPlusBackgroundDict.cc DsDPlusBackgroundDict.h DsTauThreeMuDict.cc DsTauThreeMuDict.h
+               softQcdDict.cc softQcdDict.h DsDPlusBackgroundDict.cc DsDPlusBackgroundDict.h DsTauThreeMuDict.cc DsTauThreeMuDict.h minbiasDict.h minbiasDict.cc
 
