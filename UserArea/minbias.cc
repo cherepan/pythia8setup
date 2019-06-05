@@ -22,7 +22,7 @@ void removeDuplicates(std::vector<int>& vec)
 
 
 int main(int argc,char **argv) {
-  bool DEBUG(true);
+  bool DEBUG(false);
   Pythia pythia; 
   pythia.readFile(argv[1]);
   pythia.readString("Random:setSeed = on");

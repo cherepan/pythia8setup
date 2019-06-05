@@ -2,9 +2,9 @@ universe     = vanilla
 rank         = memory       
 executable   = Set.sh
 arguments    = $(ProcId)
-output       = Set_62-Condor_$(cluster)_$(proccess).o  
-error        = Set_62-Condor_$(cluster)_$(proccess).e  
-log          = Set_62-Condor_$(cluster)_$(proccess).log  
+output       = Set-Condor_$(cluster)_$(proccess).o  
+error        = Set-Condor_$(cluster)_$(proccess).e  
+log          = Set-Condor_$(cluster)_$(proccess).log  
 getenv       = True
 notification = Error        
-queue  3
+queue  500

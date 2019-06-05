@@ -53,7 +53,9 @@ int main() {
 	time_t startTime;//, endTime, beforeLoop, afterLoop;
 	time(&startTime);
 
-
+	int nEvt(0);
+	int nSelEvt(0);
+	int nMassCut(0);
 	TString path= (TString)std::getenv("PWD");
 	TString FileName  = "Output.root";
 	TFile *file = new TFile(FileName,"RECREATE");
@@ -64,7 +66,7 @@ int main() {
 	double eta1,eta2,eta3;
 	float costheta;
 	double id;
-
+	TH1F *Nmuons= new TH1F("Nmuons","Nmuons",8,-0.5,7.5);
 	t->Branch("m12",&m12);
 	t->Branch("m13",&m13);
 	t->Branch("m23",&m23);
@@ -99,117 +101,139 @@ int main() {
 
 	TString base = std::getenv("PWD");
 	base += "/";
-	TString FileList = base + "InputFilesSignal.dat";
+	TString FileList = base + "Filelist.dat";
 
 	std::vector<TString> Files;
 	GetVectorString(Files, FileList);
 	std::vector<std::vector<TLorentzVector> > SignalMuons;
 	std::vector<int> SignalIDS;
+	std::vector<int> SignalParticleIndex;
 	Tools Tls(Files);
 	Int_t nentries = Tls.Get_Entries();
 
 
 
 	for (int i = 0; i < nentries; i++) {
+	  //	  std::cout<<"event  "<< std::endl;
+	  nEvt++;
 	  SignalMuons.clear();
 	  SignalIDS.clear();
+	  SignalParticleIndex.clear();
 	  Tls.Get_Event(i);
 	  TLorentzVector TauLV;
+	  std::vector<std::pair<int,TLorentzVector> > temp;
+	  int sumCharge(0);
 	  for(int isigp=0; isigp< Tls.NSignalParticles(); isigp++){
 	    //	    Tls.PrintDecay(isigp);
 	    SignalIDS.push_back(Tls.DecayID(isigp));
 	    //	    std::cout<<"   "<< Tls.DecayID(isigp) <<std::endl;
-	    std::vector<std::pair<int,TLorentzVector> > temp;
+	   
 	    for(int j=0; j< Tls.NDecayProducts(isigp); j++){
 	      //	      std::cout<<"id and mass   "<< Tls.SignalParticle_child_pdgId(isigp,j)<< "    "<<Tls.SignalParticle_childp4(isigp,j).M() <<  std::endl;
-	      if(abs(Tls.SignalParticle_child_pdgId(isigp,j))==13 ){
+	      if(abs(Tls.SignalParticle_child_pdgId(isigp,j))==13  && fabs(Tls.SignalParticle_childp4(isigp,j).Eta())<2.4 && Tls.SignalParticle_childp4(isigp,j).Pt() > 0.5 ){
 		temp.push_back(std::make_pair(Tls.SignalParticle_child_pdgId(isigp,j),Tls.SignalParticle_childp4(isigp,j)));
+		SignalParticleIndex.push_back(isigp);
+		sumCharge +=Tls.SignalParticle_child_pdgId(isigp,j);
 	      }
 	      for(int k=0; k<Tls.NChildChildProducts(isigp,j); k++){
 		//		std::cout<<"--------------   "<<  Tls.SignalParticle_child_child_pdgId(isigp,j,k) << "    "<<Tls.SignalParticle_child_child_p4(isigp,j,k).Px() <<  std::endl;
-		if(abs(Tls.SignalParticle_child_child_pdgId(isigp,j,k))==13){
+		if(abs(Tls.SignalParticle_child_child_pdgId(isigp,j,k))==13 && fabs(Tls.SignalParticle_child_child_p4(isigp,j,k).Eta()) < 2.4 && Tls.SignalParticle_child_child_p4(isigp,j,k).Pt() > 0.5){
+		  sumCharge+=Tls.SignalParticle_child_child_pdgId(isigp,j,k);
 		  temp.push_back(std::make_pair(Tls.SignalParticle_child_child_pdgId(isigp,j,k),Tls.SignalParticle_child_child_p4(isigp,j,k)));
+		  SignalParticleIndex.push_back(isigp);
 		}
 	      }
 	    }
-	    //	    std::vector<TLorentzVector>  vec=sortMuons(temp);
-	    //	    for (auto &v:vec){ v.Print();}
-	    SignalMuons.push_back(Tls.sortMuons(temp));
 	  }
-
+	  Nmuons->Fill(temp.size());
+	  if(temp.size()==3 && abs(sumCharge) == 13){
+	    SignalMuons.push_back(Tls.sortMuons(temp));
+	    nSelEvt++;
+	  }
+	  if(SignalMuons.size()!=0)threemu_category++;
 	  for(unsigned int i=0; i< SignalMuons.size(); i++){
-	    //	  for (auto &i:SignalMuons){
 	    id=SignalIDS.at(i);
-	    if(id!=0){
-	    TLorentzVector osmuon=SignalMuons.at(i).at(0);
-	    TLorentzVector ss1muon=SignalMuons.at(i).at(1);
-	    TLorentzVector ss2muon=SignalMuons.at(i).at(2);
-
-	    m12 = (osmuon+ss1muon).M();
-	    m13 = (osmuon+ss2muon).M();
-	    m23 = (ss1muon+ss2muon).M();	    
-	    m   = (osmuon+ss1muon+ss2muon).M();
+	    {
 
 
 
-	    TLorentzVector Tau = osmuon+ss1muon+ss2muon;
-
-	    /*	    std::cout<<"px1  "<< osmuon.Px() << std::endl;
-	    std::cout<<"px2  "<< ss1muon.Px() << std::endl;
-	    std::cout<<"px3  "<< ss2muon.Px() << std::endl;
-
-	    std::cout<<"m12  "<< m12 <<std::endl;
-	    std::cout<<"m13  "<< m13 <<std::endl;
-	    std::cout<<"m23  "<< m23 <<std::endl;
-	    */
-	    pt1=osmuon.Pt();   eta1=osmuon.Eta();
-	    pt2=ss1muon.Pt();  eta2=ss1muon.Eta();
-	    pt3=ss2muon.Pt();  eta3=ss2muon.Eta();
-	    //	    std::cout<<"------- id "<< id << std::endl;
-	    //	    costheta=0;
-	    //	    if(id ==555){
-	    //	      std::cout<<"------- id "<< id << std::endl;
+	      TLorentzVector osmuon=SignalMuons.at(i).at(0);
+	      TLorentzVector ss1muon=SignalMuons.at(i).at(1);
+	      TLorentzVector ss2muon=SignalMuons.at(i).at(2);
+	      
+	      m12 = (osmuon+ss1muon).M();
+	      m13 = (osmuon+ss2muon).M();
+	      m23 = (ss1muon+ss2muon).M();	    
+	      m   = (osmuon+ss1muon+ss2muon).M();
+	      if(m < 1.9 && m > 1.6 ) {
+		nMassCut++;
+		for(auto &i: SignalParticleIndex){
+		  Tls.PrintDecay(i);
+		}
+			osmuon.Print();
+			ss1muon.Print();
+			ss2muon.Print();
+	      }
+	      //	      std::cout<<"m "<< m << std::endl;
+	      
+	      TLorentzVector Tau = osmuon+ss1muon+ss2muon;
+	      
+	      /*	    std::cout<<"px1  "<< osmuon.Px() << std::endl;
+			    std::cout<<"px2  "<< ss1muon.Px() << std::endl;
+			    std::cout<<"px3  "<< ss2muon.Px() << std::endl;
+			    
+			    std::cout<<"m12  "<< m12 <<std::endl;
+			    std::cout<<"m13  "<< m13 <<std::endl;
+			    std::cout<<"m23  "<< m23 <<std::endl;
+	      */
+	      pt1=osmuon.Pt();   eta1=osmuon.Eta();
+	      pt2=ss1muon.Pt();  eta2=ss1muon.Eta();
+	      pt3=ss2muon.Pt();  eta3=ss2muon.Eta();
+	      //	    std::cout<<"------- id "<< id << std::endl;
+	      //	    costheta=0;
+	      //	    if(id ==555){
+	      //	      std::cout<<"------- id "<< id << std::endl;
 	      //	      std::cout<<"m12  "<< m12 <<std::endl;
 	      //	      std::cout<<"m13  "<< m13 <<std::endl;
+	      
+	      /*
+		TVector3 Rotate=Tau.Vect();
+		TLorentzVector TauRotated = Tau;
+		TauRotated.SetVect(Tls.Rotate(TauRotated.Vect(), Rotate));
+		std::cout<<"rotated  "<< std::endl;
+		//	      TauRotated.Print();
+		
+		TLorentzVector TauRest = Tls.Boost( TauRotated, TauRotated);
+		//	      TauRest.Print();
+		
+		
+		TLorentzVector MuOsRotated = osmuon;
+		TLorentzVector MuSS1Rotated = ss1muon;
+		TLorentzVector MuSS2Rotated = ss2muon;
+		
+		
+		MuOsRotated.SetVect(Tls.Rotate( MuOsRotated.Vect(), Rotate));
+		MuSS1Rotated.SetVect(Tls.Rotate( MuSS1Rotated.Vect(), Rotate));
+		MuSS2Rotated.SetVect(Tls.Rotate( MuSS2Rotated.Vect(), Rotate));
+		
+		TLorentzVector OsMuTauRest = Tls.Boost(MuOsRotated, TauRotated);
+		TLorentzVector Ss1MuTauRest = Tls.Boost(MuSS1Rotated, TauRotated);
+		TLorentzVector Ss2MuTauRest = Tls.Boost(MuSS2Rotated, TauRotated);
+		
+		
+		TVector3 nss1= Ss1MuTauRest.Vect()*(1/Ss1MuTauRest.Vect().Mag());
+		TVector3 nss2= Ss2MuTauRest.Vect()*(1/Ss2MuTauRest.Vect().Mag());
+		TVector3 noss= OsMuTauRest.Vect()*(1/OsMuTauRest.Vect().Mag());
+		TVector3 nPerp= (nss1.Cross(nss2))*(1/(nss1.Cross(nss2)).Mag());
 
-
-	      TVector3 Rotate=Tau.Vect();
-	      TLorentzVector TauRotated = Tau;
-	      TauRotated.SetVect(Tls.Rotate(TauRotated.Vect(), Rotate));
-	      std::cout<<"rotated  "<< std::endl;
-	      //	      TauRotated.Print();
-
-	      TLorentzVector TauRest = Tls.Boost( TauRotated, TauRotated);
-	      //	      TauRest.Print();
-
-
-	      TLorentzVector MuOsRotated = osmuon;
-	      TLorentzVector MuSS1Rotated = ss1muon;
-	      TLorentzVector MuSS2Rotated = ss2muon;
-
-
-	      MuOsRotated.SetVect(Tls.Rotate( MuOsRotated.Vect(), Rotate));
-	      MuSS1Rotated.SetVect(Tls.Rotate( MuSS1Rotated.Vect(), Rotate));
-	      MuSS2Rotated.SetVect(Tls.Rotate( MuSS2Rotated.Vect(), Rotate));
-
-	      TLorentzVector OsMuTauRest = Tls.Boost(MuOsRotated, TauRotated);
-	      TLorentzVector Ss1MuTauRest = Tls.Boost(MuSS1Rotated, TauRotated);
-	      TLorentzVector Ss2MuTauRest = Tls.Boost(MuSS2Rotated, TauRotated);
-
-
-	      TVector3 nss1= Ss1MuTauRest.Vect()*(1/Ss1MuTauRest.Vect().Mag());
-	      TVector3 nss2= Ss2MuTauRest.Vect()*(1/Ss2MuTauRest.Vect().Mag());
-	      TVector3 noss= OsMuTauRest.Vect()*(1/OsMuTauRest.Vect().Mag());
-	      TVector3 nPerp= (nss1.Cross(nss2))*(1/(nss1.Cross(nss2)).Mag());
-
-
-	      std::cout<<"   "<< nss1*nPerp <<"  " << nss2*nPerp << "   "<< noss*nPerp << std::endl;
-
-
-	      //	      OsMuTauRest.Print();
+		
+		std::cout<<"   "<< nss1*nPerp <<"  " << nss2*nPerp << "   "<< noss*nPerp << std::endl;
+		
+		
+		//	      OsMuTauRest.Print();
 	      //	      (Ss1MuTauRest + Ss2MuTauRest).Print();
-
-
+	      
+	      
 	      TLorentzVector Pi1Rotated = osmuon;
 	      Pi1Rotated.SetVect(Tls.Rotate(Pi1Rotated.Vect(), Rotate));
 
@@ -231,7 +255,7 @@ int main() {
 
 	      //	      TLorentzVector PhiRest=Tls.Boost(Phi,Phi);
 	      //	      PhiRest.Print();
-
+	      */
 	      //	    }
 	    t->Fill();
 	    }
@@ -240,7 +264,8 @@ int main() {
 
 	file->Write();
 
-	std::cout << "Total Events number analysed:  "<<nentries<< " With Tau Lepton:  "<< tau_category << " With three mu  " << threemu_category <<std::endl;
+	//	std::cout << "Total Events number analysed:  "<<nentries<< " With Tau Lepton:  "<< tau_category << " With three mu  " << threemu_category <<std::endl;
+	std::cout << "Total Events number analysed: "<<nEvt<< "   Selected: "<< nSelEvt << "    Efficiency: " << 100*float(nSelEvt)/float(nEvt)<<" % " << "  In mass region:  "<<  100*float(nMassCut)/float(nEvt) << " % "<<std::endl;
 	std::cout << "Program is Finished" << endl;
 
 	system("date");

@@ -10,8 +10,8 @@ cd /afs/cern.ch/work/c/cherepan/pythia/pythia8setup/install/tauola++/1.1.5/pythi
 mkdir $TMPDIR/workdirCondor
 cp -r * $TMPDIR/workdirCondor
 cd  $TMPDIR/workdirCondor
-echo $1
-/afs/cern.ch/work/c/cherepan/pythia/pythia8setup/install/tauola++/1.1.5/pythia8/176/UserArea/softQcd.exe run_card.cmnd MinBias_03_06_Run_$1
+#echo $1
+/afs/cern.ch/work/c/cherepan/pythia/pythia8setup/install/tauola++/1.1.5/pythia8/176/UserArea/minbias.exe run_card.cmnd MinBias_03_06_Run_2_$1
 cp -r *  /afs/cern.ch/work/c/cherepan/pythia/pythia8setup/install/tauola++/1.1.5/pythia8/176/UserArea
 echo 'Completed Job' 
 
