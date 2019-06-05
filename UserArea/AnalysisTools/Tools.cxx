@@ -1,6 +1,7 @@
 #include "Tools.h"
 //#include "PDG_Var.h"
 #include "TF1.h"
+#include "PDGInfo.h"
 
 
 Tools::Tools(std::vector<TString> RootFiles):
@@ -93,10 +94,16 @@ std::vector<TLorentzVector> Tools::sortMuons(std::vector<std::pair<int,TLorentzV
   TLorentzVector OSMu(0,0,0,0);
   TLorentzVector SSMu1(0,0,0,0);
   TLorentzVector SSMu2(0,0,0,0);
+
+
+  int totalCharge(0);
   for (auto &i:pairs){
+    //    std::cout<<"sortMuons  "<< i.first << std::endl;
+    totalCharge+=i.first;
     if(i.first == 13)mum++;
     if(i.first == -13)mup++;
   }
+  //  std::cout<<"total Charge  "<< totalCharge << std::endl;
   if(mup==1&&mum==2){
     int nss=0;
     for (auto &i:pairs){
@@ -143,13 +150,17 @@ std::vector<TLorentzVector> Tools::sortMuons(std::vector<std::pair<int,TLorentzV
 
 //}
 
+double Tools::pT(double px, double py){
+  return sqrt(px*px + py*py);
+}
 
 void Tools::PrintDecay(unsigned int i){
-  std::cout<<"decay chain:  "<< Ntp->SignalParticle_pdgId->at(i) << std::endl;
+  std::cout<<"decay chain:  "<< PDGInfo::pdgIdToName(Ntp->SignalParticle_pdgId->at(i)) << std::endl;
   for (unsigned int j =0; j< Ntp->SignalParticle_child_pdgId->at(i).size(); j++){
-    std::cout<<"                -> "<<Ntp->SignalParticle_child_pdgId->at(i).at(j) << std::endl;
+    std::cout<<"                -> "<<PDGInfo::pdgIdToName(Ntp->SignalParticle_child_pdgId->at(i).at(j)) << "  px:  "<< pT(Ntp->SignalParticle_childp4->at(i).at(j).at(1),Ntp->SignalParticle_childp4->at(i).at(j).at(2))<<std::endl;
     for(unsigned int k=0; k < Ntp->SignalParticle_child_child_pdgId->at(i).at(j).size(); k++){
-      std::cout<<"                      ->"<<  Ntp->SignalParticle_child_child_pdgId->at(i).at(j).at(k) << std::endl;
+      std::cout<<"                      ->"<<  PDGInfo::pdgIdToName(Ntp->SignalParticle_child_child_pdgId->at(i).at(j).at(k)) <<"  px:  " 
+	       <<pT(Ntp->SignalParticle_child_child_p4->at(i).at(j).at(k).at(1),Ntp->SignalParticle_child_child_p4->at(i).at(j).at(k).at(2) ) << std::endl;
     }
   }
 }
@@ -239,7 +250,7 @@ int Tools::DecayID(unsigned int i){
       }
     }  
   }
-  std::cout<<"Could not classify the decay! return 0; "<< std::endl;
+  //  std::cout<<"Could not classify the decay! return 0; "<< std::endl;
   return 0;
 
 }
@@ -263,7 +274,7 @@ int Tools::AnalyzeMesonDecay(std::vector<int> v){
     }
     if(nmu==3) return 5;
   }
-  std::cout<<"Cant analyze meson decay, return 0;"<<std::endl;
+  //  std::cout<<"Cant analyze meson decay, return 0;"<<std::endl;
   return 0;
 }
 

@@ -7,6 +7,7 @@
 #include <string.h>
 #include <istream>
 #include <strstream>
+#include "PDGInfo.h"
  
 #include "TApplication.h"
 #include "TROOT.h"
@@ -114,7 +115,7 @@ int main() {
 
 
 	for (int i = 0; i < nentries; i++) {
-	  //	  std::cout<<"event  "<< std::endl;
+	  std::cout<<"event  "<< std::endl;
 	  nEvt++;
 	  SignalMuons.clear();
 	  SignalIDS.clear();
@@ -123,6 +124,7 @@ int main() {
 	  TLorentzVector TauLV;
 	  std::vector<std::pair<int,TLorentzVector> > temp;
 	  int sumCharge(0);
+	  std::vector<double> CheckPtDublicate;
 	  for(int isigp=0; isigp< Tls.NSignalParticles(); isigp++){
 	    //	    Tls.PrintDecay(isigp);
 	    SignalIDS.push_back(Tls.DecayID(isigp));
@@ -130,17 +132,27 @@ int main() {
 	   
 	    for(int j=0; j< Tls.NDecayProducts(isigp); j++){
 	      //	      std::cout<<"id and mass   "<< Tls.SignalParticle_child_pdgId(isigp,j)<< "    "<<Tls.SignalParticle_childp4(isigp,j).M() <<  std::endl;
-	      if(abs(Tls.SignalParticle_child_pdgId(isigp,j))==13  && fabs(Tls.SignalParticle_childp4(isigp,j).Eta())<2.4 && Tls.SignalParticle_childp4(isigp,j).Pt() > 0.5 ){
-		temp.push_back(std::make_pair(Tls.SignalParticle_child_pdgId(isigp,j),Tls.SignalParticle_childp4(isigp,j)));
-		SignalParticleIndex.push_back(isigp);
-		sumCharge +=Tls.SignalParticle_child_pdgId(isigp,j);
+	      //	      std::cout<<"fist  "<< Tls.SignalParticle_child_pdgId(isigp,j)<< std::endl;
+	      if(abs(Tls.SignalParticle_child_pdgId(isigp,j))==13  && fabs(Tls.SignalParticle_childp4(isigp,j).Eta())<2.4 && Tls.SignalParticle_childp4(isigp,j).Pt() > 1 ){
+		if(! ( std::find(CheckPtDublicate.begin(), CheckPtDublicate.end(), Tls.SignalParticle_childp4(isigp,j).Pt()) != CheckPtDublicate.end() ) ){
+		  CheckPtDublicate.push_back(Tls.SignalParticle_childp4(isigp,j).Pt());
+		  temp.push_back(std::make_pair(Tls.SignalParticle_child_pdgId(isigp,j),Tls.SignalParticle_childp4(isigp,j)));
+		  std::cout<<"first loop pt  "<< Tls.SignalParticle_childp4(isigp,j).Pt() << "  signal: "<< PDGInfo::pdgIdToName(Tls.SignalParticle_pdgId(isigp)) <<std::endl;
+		  SignalParticleIndex.push_back(isigp);
+		  sumCharge +=Tls.SignalParticle_child_pdgId(isigp,j);
+		}
 	      }
 	      for(int k=0; k<Tls.NChildChildProducts(isigp,j); k++){
 		//		std::cout<<"--------------   "<<  Tls.SignalParticle_child_child_pdgId(isigp,j,k) << "    "<<Tls.SignalParticle_child_child_p4(isigp,j,k).Px() <<  std::endl;
-		if(abs(Tls.SignalParticle_child_child_pdgId(isigp,j,k))==13 && fabs(Tls.SignalParticle_child_child_p4(isigp,j,k).Eta()) < 2.4 && Tls.SignalParticle_child_child_p4(isigp,j,k).Pt() > 0.5){
-		  sumCharge+=Tls.SignalParticle_child_child_pdgId(isigp,j,k);
-		  temp.push_back(std::make_pair(Tls.SignalParticle_child_child_pdgId(isigp,j,k),Tls.SignalParticle_child_child_p4(isigp,j,k)));
-		  SignalParticleIndex.push_back(isigp);
+		//		std::cout<<"second  "<< Tls.SignalParticle_child_child_pdgId(isigp,j,k) << std::endl;
+		if( abs(Tls.SignalParticle_child_child_pdgId(isigp,j,k))==13 && fabs(Tls.SignalParticle_child_child_p4(isigp,j,k).Eta()) < 2.4 && Tls.SignalParticle_child_child_p4(isigp,j,k).Pt() > 1){
+		  if(! ( std::find(CheckPtDublicate.begin(), CheckPtDublicate.end(), Tls.SignalParticle_child_child_p4(isigp,j,k).Pt()) != CheckPtDublicate.end() )){
+		    CheckPtDublicate.push_back(Tls.SignalParticle_child_child_p4(isigp,j,k).Pt());
+		    sumCharge+=Tls.SignalParticle_child_child_pdgId(isigp,j,k);
+		    temp.push_back(std::make_pair(Tls.SignalParticle_child_child_pdgId(isigp,j,k),Tls.SignalParticle_child_child_p4(isigp,j,k)));
+		    std::cout<<"second loop pt  "<< Tls.SignalParticle_child_child_p4(isigp,j,k).Pt() <<  PDGInfo::pdgIdToName(Tls.SignalParticle_pdgId(isigp)) <<std::endl;
+		    SignalParticleIndex.push_back(isigp);
+		  }
 		}
 	      }
 	    }
@@ -165,10 +177,12 @@ int main() {
 	      m13 = (osmuon+ss2muon).M();
 	      m23 = (ss1muon+ss2muon).M();	    
 	      m   = (osmuon+ss1muon+ss2muon).M();
-	      if(m < 1.9 && m > 1.6 ) {
+	      if(m23< 0.4)
+		{
 		nMassCut++;
 		for(auto &i: SignalParticleIndex){
 		  Tls.PrintDecay(i);
+		  std::cout<<"index  "<< i << std::endl;
 		}
 			osmuon.Print();
 			ss1muon.Print();

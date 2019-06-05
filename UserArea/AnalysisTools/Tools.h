@@ -133,6 +133,7 @@ class Tools{
 
 
   int DecayID(unsigned int i);
+  double pT(double px, double py);
   void PrintDecay(unsigned int i);
   int AnalyzeMesonDecay(std::vector<int> v);
   unsigned int GetType(TString name);
