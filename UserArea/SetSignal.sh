@@ -11,7 +11,7 @@ mkdir $TMPDIR/workdirCondor
 cp -r * $TMPDIR/workdirCondor
 cd  $TMPDIR/workdirCondor
 #echo $1
-/afs/cern.ch/work/c/cherepan/pythia/pythia8setup/install/tauola++/1.1.5/pythia8/176/UserArea/minbias.exe run_card.cmnd MinBias_03_06_Run_8_$1
+/afs/cern.ch/work/c/cherepan/pythia/pythia8setup/install/tauola++/1.1.5/pythia8/176/UserArea/DsDPlusBackground.exe run_card_ds_tau_threemu.cmnd  Signal_Run_1_$1
 cp -r *  /afs/cern.ch/work/c/cherepan/pythia/pythia8setup/install/tauola++/1.1.5/pythia8/176/UserArea
 echo 'Completed Job' 
 

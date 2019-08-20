@@ -59,19 +59,11 @@ int main() {
 	TFile *file = new TFile(FileName,"RECREATE");
 	TTree * t = new TTree("T","T");
 
-	double m12,m13,m23,tau_m, tau_eta, tau_pt;
+	double m12,m13,m23,m;
 	double pt1,pt2,pt3;
 	double eta1,eta2,eta3;
 	float costheta;
 	double id;
-
-	double mu_1_Pt_sorted_pt,mu_2_Pt_sorted_pt,
-	  mu_3_Pt_sorted_pt,mu_1_Pt_sorted_eta,
-	  mu_2_Pt_sorted_eta,mu_3_Pt_sorted_eta,
-	  mu_1_Eta_sorted_pt,mu_2_Eta_sorted_pt,
-	  mu_3_Eta_sorted_pt,mu_1_Eta_sorted_eta,
-	  mu_2_Eta_sorted_eta,mu_3_Eta_sorted_eta;
-
 
 	t->Branch("m12",&m12);
 	t->Branch("m13",&m13);
@@ -86,30 +78,9 @@ int main() {
 	t->Branch("eta2",&eta2);
 	t->Branch("eta3",&eta3);
 
-	t->Branch("mu_1_Pt_sorted_pt",&mu_1_Pt_sorted_pt);
-	t->Branch("mu_2_Pt_sorted_pt",&mu_2_Pt_sorted_pt);
-	t->Branch("mu_3_Pt_sorted_pt",&mu_3_Pt_sorted_pt);
+	t->Branch("costheta",&costheta);
 
-	t->Branch("mu_1_Pt_sorted_eta",&mu_1_Pt_sorted_eta);
-	t->Branch("mu_2_Pt_sorted_eta",&mu_2_Pt_sorted_eta);
-	t->Branch("mu_3_Pt_sorted_eta",&mu_3_Pt_sorted_eta);
-
-
-	t->Branch("mu_1_Eta_sorted_pt",&mu_1_Eta_sorted_pt);
-	t->Branch("mu_2_Eta_sorted_pt",&mu_2_Eta_sorted_pt);
-	t->Branch("mu_3_Eta_sorted_pt",&mu_3_Eta_sorted_pt);
-
-	t->Branch("mu_1_Eta_sorted_eta",&mu_1_Eta_sorted_eta);
-	t->Branch("mu_2_Eta_sorted_eta",&mu_2_Eta_sorted_eta);
-	t->Branch("mu_3_Eta_sorted_eta",&mu_3_Eta_sorted_eta);
-
-
-
-	//	t->Branch("costheta",&costheta);
-
-	t->Branch("tau_m",&tau_m);
-	t->Branch("tau_eta",&tau_eta);
-	t->Branch("tau_pt",&tau_pt);
+	t->Branch("m",&m);
 
 	t->Branch("id",&id);
 	/*	TH1F *tauPT= new TH1F("tauPT","p_{T}(#tau), GeV ",50,0,20);
@@ -128,12 +99,11 @@ int main() {
 
 	TString base = std::getenv("PWD");
 	base += "/";
-	TString FileList = base + "SignalFileList.dat";
+	TString FileList = base + "InputFilesSignal.dat";
 
 	std::vector<TString> Files;
 	GetVectorString(Files, FileList);
 	std::vector<std::vector<TLorentzVector> > SignalMuons;
-	std::vector<std::vector<TLorentzVector> > SignalMuonsUnsorted;
 	std::vector<int> SignalIDS;
 	Tools Tls(Files);
 	Int_t nentries = Tls.Get_Entries();
@@ -142,7 +112,6 @@ int main() {
 
 	for (int i = 0; i < nentries; i++) {
 	  SignalMuons.clear();
-	  SignalMuonsUnsorted.clear();
 	  SignalIDS.clear();
 	  Tls.Get_Event(i);
 	  TLorentzVector TauLV;
@@ -166,7 +135,6 @@ int main() {
 	    //	    std::vector<TLorentzVector>  vec=sortMuons(temp);
 	    //	    for (auto &v:vec){ v.Print();}
 	    SignalMuons.push_back(Tls.sortMuons(temp));
-	    //	    SignalMuonsUnsorted.push_back(temp);
 	  }
 
 	  for(unsigned int i=0; i< SignalMuons.size(); i++){
@@ -177,52 +145,10 @@ int main() {
 	    TLorentzVector ss1muon=SignalMuons.at(i).at(1);
 	    TLorentzVector ss2muon=SignalMuons.at(i).at(2);
 
-
-
-
 	    m12 = (osmuon+ss1muon).M();
 	    m13 = (osmuon+ss2muon).M();
 	    m23 = (ss1muon+ss2muon).M();	    
-	    tau_m   = (osmuon+ss1muon+ss2muon).M();
-	    tau_eta   = (osmuon+ss1muon+ss2muon).Eta();
-	    tau_pt   = (osmuon+ss1muon+ss2muon).Pt();
-
-	    std::vector<TLorentzVector> vecTosort;
-	    vecTosort.push_back(osmuon);
-	    vecTosort.push_back(ss1muon);
-	    vecTosort.push_back(ss2muon);
-
-
-	    std::vector<TLorentzVector> PtSortedVector = Tls.sortByPt(vecTosort);
-	    std::vector<TLorentzVector> EtaSortedVector = Tls.sortByEta(vecTosort);
-
-
-	    //	    std::cout<<"  1  "<< PtSortedVector.at(0).Pt() << std::endl;
-	    //	    std::cout<<"  2  "<< PtSortedVector.at(1).Pt() << std::endl;
-	    //	    std::cout<<"  3  "<< PtSortedVector.at(2).Pt() << std::endl;
-
-
-	    std::cout<<"  1  "<< EtaSortedVector.at(0).Eta() << std::endl;
-	    std::cout<<"  2  "<< EtaSortedVector.at(1).Eta() << std::endl;
-	    std::cout<<"  3  "<< EtaSortedVector.at(2).Eta() << std::endl;
-
-
-	    mu_1_Pt_sorted_pt = PtSortedVector.at(0).Pt();
-	    mu_2_Pt_sorted_pt = PtSortedVector.at(1).Pt();
-	    mu_3_Pt_sorted_pt = PtSortedVector.at(2).Pt();
-	    mu_1_Pt_sorted_eta = PtSortedVector.at(0).Eta();
-	    mu_2_Pt_sorted_eta = PtSortedVector.at(1).Eta();
-	    mu_3_Pt_sorted_eta = PtSortedVector.at(2).Eta();
-
-
-	    mu_1_Eta_sorted_pt =   EtaSortedVector.at(0).Pt();
-	    mu_2_Eta_sorted_pt  =   EtaSortedVector.at(1).Pt();
-	    mu_3_Eta_sorted_pt   =   EtaSortedVector.at(2).Pt();
-	    mu_1_Eta_sorted_eta =  EtaSortedVector.at(0).Eta();
-	    mu_2_Eta_sorted_eta  =  EtaSortedVector.at(1).Eta();
-	    mu_3_Eta_sorted_eta  =  EtaSortedVector.at(2).Eta();
-	  
-
+	    m   = (osmuon+ss1muon+ss2muon).M();
 
 
 
@@ -250,7 +176,7 @@ int main() {
 	      TVector3 Rotate=Tau.Vect();
 	      TLorentzVector TauRotated = Tau;
 	      TauRotated.SetVect(Tls.Rotate(TauRotated.Vect(), Rotate));
-	      //	      std::cout<<"rotated  "<< std::endl;
+	      std::cout<<"rotated  "<< std::endl;
 	      //	      TauRotated.Print();
 
 	      TLorentzVector TauRest = Tls.Boost( TauRotated, TauRotated);
@@ -277,7 +203,7 @@ int main() {
 	      TVector3 nPerp= (nss1.Cross(nss2))*(1/(nss1.Cross(nss2)).Mag());
 
 
-	      //	      std::cout<<"   "<< nss1*nPerp <<"  " << nss2*nPerp << "   "<< noss*nPerp << std::endl;
+	      std::cout<<"   "<< nss1*nPerp <<"  " << nss2*nPerp << "   "<< noss*nPerp << std::endl;
 
 
 	      //	      OsMuTauRest.Print();

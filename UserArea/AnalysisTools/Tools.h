@@ -138,6 +138,10 @@ class Tools{
   int AnalyzeMesonDecay(std::vector<int> v);
   unsigned int GetType(TString name);
   std::vector<TLorentzVector> sortMuons(std::vector<std::pair<int,TLorentzVector> >  pairs);
+  std::vector<TLorentzVector> sortByEta(std::vector<TLorentzVector>  vec);
+  std::vector<TLorentzVector> sortByPt(std::vector<TLorentzVector>  vec);
+
+
   TLorentzVector Boost(TLorentzVector pB, TLorentzVector frame);
 
   TVector3 Rotate(TVector3 LVec, TVector3 Rot);

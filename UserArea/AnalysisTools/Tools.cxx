@@ -89,6 +89,99 @@ unsigned int Tools::GetType(TString name){
 }
 
 
+std::vector<TLorentzVector> Tools::sortByEta(std::vector<TLorentzVector>  vec){
+  std::vector<TLorentzVector> out;
+  double eta1 = fabs(vec.at(0).Eta());
+  double eta2 = fabs(vec.at(1).Eta());
+  double eta3 = fabs(vec.at(2).Eta());
+
+
+  unsigned int i1,i2,i3;
+  if(eta1>eta2)
+    {
+      if(eta2>eta3)
+	{
+	  i1=0; i2 = 1; i3 = 2;
+	}
+      else if(eta1>eta3)
+	{
+	  i1=0; i2 = 2; i3 = 1;
+	}
+      else
+	{
+	  i1=2; i2 = 0; i3 = 1;
+	}
+    }
+  else
+    {
+      if(eta1>eta3)
+	{
+	  i1= 1; i2 = 0; i3 = 2;
+	}
+      else if(eta2>eta3)
+	{
+	  i1= 1; i2 = 2; i3 =0;
+	}
+      else
+	{
+	  i1= 2; i2 = 1; i3 = 0;
+	}
+    }
+
+  out.push_back(vec.at(i1));
+  out.push_back(vec.at(i2));
+  out.push_back(vec.at(i3));
+
+
+  return out;
+
+}
+std::vector<TLorentzVector> Tools::sortByPt(std::vector<TLorentzVector>  vec){
+  std::vector<TLorentzVector> out;
+  double pt1 = vec.at(0).Pt();
+  double pt2 = vec.at(1).Pt();
+  double pt3 = vec.at(2).Pt();
+
+  unsigned int i1,i2,i3;
+  if(pt1>pt2)
+    {
+      if(pt2>pt3)
+	{
+	  i1=0; i2 = 1; i3 = 2;
+	}
+      else if(pt1>pt3)
+	{
+	  i1=0; i2 = 2; i3 = 1;
+	}
+      else
+	{
+	  i1=2; i2 = 0; i3 = 1;
+	}
+    }
+  else
+    {
+      if(pt1>pt3)
+	{
+	  i1= 1; i2 = 0; i3 = 2;
+	}
+      else if(pt2>pt3)
+	{
+	  i1= 1; i2 = 2; i3 =0;
+	}
+      else
+	{
+	  i1= 2; i2 = 1; i3 = 0;
+	}
+    }
+
+  out.push_back(vec.at(i1));
+  out.push_back(vec.at(i2));
+  out.push_back(vec.at(i3));
+
+  return out;
+}
+
+
 std::vector<TLorentzVector> Tools::sortMuons(std::vector<std::pair<int,TLorentzVector> >  pairs){
   int mum(0), mup(0);
   TLorentzVector OSMu(0,0,0,0);
@@ -141,6 +234,8 @@ std::vector<TLorentzVector> Tools::sortMuons(std::vector<std::pair<int,TLorentzV
   out.push_back(OSMu);
   out.push_back(SSMu1);
   out.push_back(SSMu2);
+
+  std::cout<<"--- "<<std::endl;
   return out;
 }
 
@@ -157,9 +252,9 @@ double Tools::pT(double px, double py){
 void Tools::PrintDecay(unsigned int i){
   std::cout<<"decay chain:  "<< PDGInfo::pdgIdToName(Ntp->SignalParticle_pdgId->at(i)) << std::endl;
   for (unsigned int j =0; j< Ntp->SignalParticle_child_pdgId->at(i).size(); j++){
-    std::cout<<"                -> "<<PDGInfo::pdgIdToName(Ntp->SignalParticle_child_pdgId->at(i).at(j)) << "  px:  "<< pT(Ntp->SignalParticle_childp4->at(i).at(j).at(1),Ntp->SignalParticle_childp4->at(i).at(j).at(2))<<std::endl;
+    std::cout<<"                -> "<<PDGInfo::pdgIdToName(Ntp->SignalParticle_child_pdgId->at(i).at(j)) << "  pt:  "<< pT(Ntp->SignalParticle_childp4->at(i).at(j).at(1),Ntp->SignalParticle_childp4->at(i).at(j).at(2))<<std::endl;
     for(unsigned int k=0; k < Ntp->SignalParticle_child_child_pdgId->at(i).at(j).size(); k++){
-      std::cout<<"                      ->"<<  PDGInfo::pdgIdToName(Ntp->SignalParticle_child_child_pdgId->at(i).at(j).at(k)) <<"  px:  " 
+      std::cout<<"                      ->"<<  PDGInfo::pdgIdToName(Ntp->SignalParticle_child_child_pdgId->at(i).at(j).at(k)) <<"  pt:  " 
 	       <<pT(Ntp->SignalParticle_child_child_p4->at(i).at(j).at(k).at(1),Ntp->SignalParticle_child_child_p4->at(i).at(j).at(k).at(2) ) << std::endl;
     }
   }

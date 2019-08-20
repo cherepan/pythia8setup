@@ -6,5 +6,6 @@ printf "Job running as user: "; /usr/bin/id
 printf "Job is running in directory: "; /bin/pwd
 echo
 echo "Working hard..."
-sleep ${1-15}
+echo "parameter:  "
+touch output_$1
 echo "Science complete!"
